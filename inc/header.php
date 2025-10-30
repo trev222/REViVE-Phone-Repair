@@ -80,10 +80,10 @@
 			?>
 			<ul>
 				<li <?php if($navi == 1){echo 'class="active"';} ?>><a href="/">Home</a></li>
-				<li <?php if($navi == 2){echo 'class="active"';} ?>><a href="/about">About</a></li>
-				<li <?php if($navi == 3){echo 'class="active"';} ?>><a href="/services">Services</a></li>
-				<li <?php if($navi == 4){echo 'class="active"';} ?>><a href="/locations">Locations</a></li>
-				<li <?php if($navi == 5){echo 'class="active"';} ?>><a href="/contact">Contact</a></li>
+				<li <?php if($navi == 2){echo 'class="active"';} ?>><a href="/about.php">About</a></li>
+				<li <?php if($navi == 3){echo 'class="active"';} ?>><a href="/services.php">Services</a></li>
+				<li <?php if($navi == 4){echo 'class="active"';} ?>><a href="/locations.php">Locations</a></li>
+				<li <?php if($navi == 5){echo 'class="active"';} ?>><a href="/contact.php">Contact</a></li>
 			</ul>
 		</div>
 
