@@ -1,0 +1,247 @@
+/* Story grid */
+:where([data-page="about"]) .about-story-grid {
+  display: grid;
+  grid-template-columns: 5fr 6fr;
+  gap: 0 clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+:where([data-page="about"]) .about-story-content {
+  grid-column: 1;
+  padding-top: 24px;
+}
+:where([data-page="about"]) .about-story-image-col {
+  grid-column: 2;
+}
+
+/* Stats bento */
+:where([data-page="about"]) .about-stats-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "lime  count  image"
+    "cert  rating image";
+  gap: 16px;
+}
+:where([data-page="about"]) .stats-lime {
+  grid-area: lime;
+}
+:where([data-page="about"]) .stats-count {
+  grid-area: count;
+}
+:where([data-page="about"]) .stats-image {
+  grid-area: image;
+  position: relative;
+}
+:where([data-page="about"]) .stats-cert {
+  grid-area: cert;
+}
+:where([data-page="about"]) .stats-rating {
+  grid-area: rating;
+}
+
+/* Credentials top row */
+:where([data-page="about"]) .cred-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+/* CTA inner */
+:where([data-page="about"]) .about-cta-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+:where([data-page="about"]) .about-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* Responsive: story */
+@media (max-width: 900px) {
+  :where([data-page="about"]) .about-story-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  :where([data-page="about"]) .about-story-content {
+    padding-top: 0;
+    order: 2;
+  }
+  :where([data-page="about"]) .about-story-image-col {
+    order: 1;
+  }
+  :where([data-page="about"]) .about-story-image-col figure > div {
+    aspect-ratio: 4 / 3 !important;
+    border-radius: 24px !important;
+  }
+}
+
+/* Responsive: stats bento */
+@media (max-width: 820px) {
+  :where([data-page="about"]) .about-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "lime  count"
+      "cert  rating"
+      "image image";
+  }
+  :where([data-page="about"]) .stats-image {
+    aspect-ratio: 16 / 9;
+    min-height: 220px;
+  }
+}
+@media (max-width: 560px) {
+  :where([data-page="about"]) .about-stats-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lime"
+      "count"
+      "cert"
+      "rating"
+      "image";
+  }
+  :where([data-page="about"]) .stats-image {
+    aspect-ratio: 4 / 3;
+    min-height: 200px;
+  }
+}
+
+/* Responsive: credentials */
+@media (max-width: 820px) {
+  :where([data-page="about"]) .cred-top {
+    flex-direction: column;
+    gap: 24px;
+  }
+  :where([data-page="about"]) .cred-top > div:last-child {
+    width: 100%;
+  }
+  :where([data-page="about"]) .cred-top > div:last-child > div {
+    justify-content: flex-start !important;
+  }
+}
+
+/* ── Stats lime bento button ── */
+:where([data-page="about"]) .stats-lime-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 13px 22px;
+  border-radius: 9999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="about"]) .stats-lime-btn:hover {
+  padding-right: 30px;
+}
+:where([data-page="about"]) .stats-lime-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: hsl(var(--background));
+  color: hsl(var(--accent));
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="about"]) .stats-lime-btn:hover .stats-lime-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(5px);
+}
+
+/* ── About CTA primary button ── */
+:where([data-page="about"]) .about-cta-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="about"]) .about-cta-primary-btn:hover {
+  padding-right: 32px;
+}
+:where([data-page="about"]) .about-cta-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="about"]) .about-cta-primary-btn:hover .about-cta-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(5px);
+}
+
+/* ── About CTA secondary button ── */
+:where([data-page="about"]) .about-cta-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  border: 1.5px solid hsl(var(--accent));
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="about"]) .about-cta-secondary-btn:hover {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* Responsive: CTA */
+@media (max-width: 640px) {
+  :where([data-page="about"]) .about-cta-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  :where([data-page="about"]) .about-cta-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

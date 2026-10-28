@@ -1,6 +1,8 @@
 # REViVE Phone Repair
 
-The original website rebuilt with Next.js App Router, React, and TypeScript. All five pages, eight slideshow photos, brand assets, Covington contact details, and service copy are carried over from the PHP site.
+The client’s GoDaddy design rebuilt with Next.js App Router, React, TypeScript, and Tailwind CSS. Home, Services, About, Contact, and Guides reproduce its green/purple palette, rounded panels, typography, responsive navigation, service selector, and quote form. The original Covington location remains available at `/locations` and through the contact page.
+
+The source is independent of GoDaddy: no builder scripts, editor chrome, promotional badges, or remote font dependency. Questrial and Be Vietnam Pro are bundled locally. The exact client logo and repair hero are stored in `public/images/`; the original shop photos replace leftover solar images. The empty roofing guide page is replaced with phone-repair and buyback guidance. Unbuilt legal links and unconfigured social accounts are omitted; the original business email and real social links are retained.
 
 ## Branches
 
@@ -64,9 +66,13 @@ Old `/index`, `/location`, and `.php`/`.html` page URLs permanently redirect to 
 ## Structure
 
 - `src/app/`: pages, metadata, shared styles, contact endpoint.
-- `src/components/`: navigation, accessible slideshow, contact form.
+- `src/components/`: navigation, service catalog, contact form, footer.
 - `src/lib/site.ts`: business content, contact details, map links.
 - `public/`: original photos, logo, social icons, favicons.
 - `tests/`: production HTTP and local SMTP integration checks.
 
-Business claims, hours, address, warranty, and service descriptions are preserved from the original site. Review them with the business before launching a new production version.
+Business claims, testimonials, warranty, and service descriptions follow the client’s GoDaddy reference. Address, phone, email, and shop photos are retained from the original repository.
+
+The quote form sends first/last name, email, optional phone, service, preferred date/contact time, and device notes to the configured mailbox. Preferred dates are requests, not confirmed bookings. Existing name/message API submissions remain supported. SMTP credentials still need to be configured for real delivery.
+
+Format source with `npx prettier --write src tests tailwind.config.ts postcss.config.mjs`.

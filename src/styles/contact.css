@@ -1,0 +1,283 @@
+/* ── Submit button (lime accent, large) ── */
+:where([data-page="contact"]) .contact-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 17px;
+  font-weight: 500;
+  padding: 18px 32px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="contact"]) .contact-submit-btn:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  padding-right: 40px;
+}
+:where([data-page="contact"]) .contact-submit-btn:hover .contact-submit-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(5px);
+}
+:where([data-page="contact"]) .contact-submit-btn:active {
+  opacity: 0.85;
+}
+:where([data-page="contact"]) .contact-submit-btn--disabled {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  cursor: not-allowed;
+}
+:where([data-page="contact"]) .contact-submit-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Direct contact buttons ── */
+:where([data-page="contact"]) .direct-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 13px 22px;
+  border-radius: 9999px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+/* Primary (ink fill) — background stays ink, chip flips lime + slides right */
+:where([data-page="contact"]) .direct-btn--primary {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="contact"]) .direct-btn--primary:hover {
+  padding-right: 27px;
+}
+:where([data-page="contact"]) .direct-btn--primary:active {
+  opacity: 0.8;
+}
+:where([data-page="contact"]) .direct-btn-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="contact"]) .direct-btn--primary:hover .direct-btn-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(4px);
+}
+:where([data-page="contact"]) .direct-btn--outline {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="contact"]) .direct-btn--outline:hover {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+:where([data-page="contact"]) .direct-btn--outline:active {
+  opacity: 0.8;
+}
+
+/* Booking unit */
+:where([data-page="contact"]) .booking-unit {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  border-radius: 32px;
+  overflow: hidden;
+  min-height: 640px;
+}
+
+:where([data-page="contact"]) .booking-left {
+  background-color: hsl(var(--accent));
+  padding: clamp(36px, 4vw, 56px) clamp(28px, 4vw, 52px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0;
+}
+
+:where([data-page="contact"]) .booking-right {
+  background-color: hsl(var(--card));
+  padding: clamp(36px, 4vw, 56px) clamp(28px, 4vw, 52px);
+  overflow-y: auto;
+}
+
+/* Ink panel typography — using opacity on the white channel */
+:where([data-page="contact"]) .panel-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--ink-panel-eyebrow) / 0.45);
+  display: block;
+  margin-bottom: 16px;
+}
+
+:where([data-page="contact"]) .panel-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 2.8vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+  color: hsl(var(--accent-foreground));
+  max-width: 18ch;
+  margin-bottom: 20px;
+}
+
+:where([data-page="contact"]) .panel-lede {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.625;
+  color: hsl(var(--ink-panel-body) / 0.65);
+  max-width: 38ch;
+  margin-bottom: 36px;
+}
+
+:where([data-page="contact"]) .trust-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background-color: hsl(var(--ink-panel-icon-bg) / 0.08);
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+:where([data-page="contact"]) .trust-text {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  color: hsl(var(--ink-panel-trust) / 0.75);
+  line-height: 1.5;
+}
+
+:where([data-page="contact"]) .panel-testimonial {
+  border-top: 1px solid hsl(var(--ink-panel-divider) / 0.1);
+  padding-top: 28px;
+  margin-top: 40px;
+}
+
+:where([data-page="contact"]) .testimonial-quote {
+  font-family: var(--font-heading);
+  font-size: clamp(18px, 1.8vw, 22px);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: hsl(var(--accent-foreground));
+  margin-bottom: 16px;
+}
+
+:where([data-page="contact"]) .testimonial-cite {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: hsl(var(--ink-panel-cite) / 0.45);
+  font-style: normal;
+}
+
+/* Form layout */
+:where([data-page="contact"]) .booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+:where([data-page="contact"]) .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+:where([data-page="contact"]) .field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+:where([data-page="contact"]) .field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Input focus ring */
+:where([data-page="contact"]) .booking-form input:focus,
+:where([data-page="contact"]) .booking-form select:focus,
+:where([data-page="contact"]) .booking-form textarea:focus {
+  border-color: hsl(var(--foreground));
+  box-shadow: 0 0 0 2px hsl(var(--foreground));
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  :where([data-page="contact"]) .booking-unit {
+    grid-template-columns: 1fr;
+  }
+  :where([data-page="contact"]) .panel-testimonial {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  :where([data-page="contact"]) .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+:where([data-page="contact"]) .field,
+:where([data-page="contact"]) .booking-right {
+  min-width: 0;
+}
+:where([data-page="contact"]) .contact-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+:where([data-page="contact"]) .direct-btn {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+:where([data-page="contact"]) .direct-btn svg {
+  flex-shrink: 0;
+}

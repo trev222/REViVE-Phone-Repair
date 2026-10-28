@@ -1,0 +1,221 @@
+/* ── Hero primary button: ink pill, chip flips lime + slides right, pill expands ── */
+:where([data-page="home"]) .hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .hero-btn-primary:hover {
+  padding-right: 30px;
+}
+:where([data-page="home"]) .hero-btn-primary:active {
+  opacity: 0.8;
+}
+:where([data-page="home"]) .hero-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--accent));
+}
+
+/* Chip: white-on-ink at rest → lime-on-ink, whole chip slides right on hover */
+:where([data-page="home"]) .hero-btn-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .hero-btn-primary:hover .hero-btn-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(5px);
+}
+
+/* ── Hero secondary button: outline pill, border darkens on hover, no fill, no scale ── */
+:where([data-page="home"]) .hero-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 14px 24px;
+  border-radius: 9999px;
+  border: 1.5px solid hsl(var(--border));
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .hero-btn-secondary:hover {
+  border-color: hsl(var(--accent));
+}
+:where([data-page="home"]) .hero-btn-secondary:active {
+  opacity: 0.8;
+}
+:where([data-page="home"]) .hero-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--accent));
+}
+
+/* ── Shared chip transition base ── */
+:where([data-page="home"]) .bento-chip,
+:where([data-page="home"]) .nbhd-chip,
+:where([data-page="home"]) .cta-bottom-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Bento card buttons ── */
+:where([data-page="home"]) .bento-btn {
+  text-decoration: none;
+  cursor: pointer;
+}
+:where([data-page="home"]) .bento-chip {
+  width: 22px;
+  height: 22px;
+}
+
+/* index 0: ink pill on lime bg — chip white→lime + slides right (only this one has a chip) */
+/* base px-5 = 20px; hover expands to 28px */
+:where([data-page="home"]) .bento-btn--ink {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .bento-btn--ink:hover {
+  padding-right: 28px;
+}
+:where([data-page="home"]) .bento-btn--ink .bento-chip {
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+}
+:where([data-page="home"]) .bento-btn--ink:hover .bento-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(4px);
+}
+
+/* index 1: solid white pill on ink bg — opacity dip on hover, no chip, no movement */
+:where([data-page="home"]) .bento-btn--outline-white {
+  background-color: hsl(var(--accent-foreground));
+  color: hsl(var(--accent));
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .bento-btn--outline-white:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+}
+
+/* sky tone card: ink outline pill, border darkens on hover, no chip */
+:where([data-page="home"]) .bento-btn--sky {
+  background-color: transparent;
+  color: hsl(var(--foreground));
+  border: 1.5px solid hsl(var(--accent));
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .bento-btn--sky:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-color: hsl(var(--accent));
+}
+
+/* fallback outline-ink for non-sky cards — fills ink on hover, text flips to primary-foreground */
+:where([data-page="home"]) .bento-btn--outline-ink {
+  border: 1.5px solid hsl(var(--accent));
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  transition:
+    background-color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .bento-btn--outline-ink:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-color: hsl(var(--accent));
+}
+
+/* ── Neighborhoods CTA (ink pill on lime bg) ── */
+:where([data-page="home"]) .nbhd-btn {
+  text-decoration: none;
+  cursor: pointer;
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .nbhd-chip {
+  width: 20px;
+  height: 20px;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .nbhd-btn:hover {
+  padding-right: 28px;
+}
+:where([data-page="home"]) .nbhd-btn:hover .nbhd-chip {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+  transform: translateX(4px);
+}
+:where([data-page="home"]) .nbhd-btn:active {
+  opacity: 0.8;
+}
+
+/* ── Bottom CTA "Request a consultation" (white pill on ink bg) ── */
+:where([data-page="home"]) .cta-bottom-btn {
+  text-decoration: none;
+  cursor: pointer;
+  transition: padding-right 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+:where([data-page="home"]) .cta-bottom-btn:hover {
+  padding-right: 28px;
+}
+:where([data-page="home"]) .cta-bottom-chip {
+  width: 20px;
+  height: 20px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--accent));
+}
+:where([data-page="home"]) .cta-bottom-btn:hover .cta-bottom-chip {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--primary));
+  transform: translateX(4px);
+}
+:where([data-page="home"]) .cta-bottom-btn:active {
+  opacity: 0.8;
+}
