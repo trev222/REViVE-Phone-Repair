@@ -8,3 +8,6 @@ coverage/
 .env*
 !.env.example
 .vercel/
+.pages-build-*/
+.wrangler/
+.dev.vars*

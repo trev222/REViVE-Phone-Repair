@@ -1,6 +1,6 @@
 export const site = {
   name: "REViVE Phone Repair",
-  url: process.env.SITE_URL || "https://www.revivephonerepair.com",
+  url: process.env.SITE_URL || "https://revivephonerepair.com",
   email: "ReviveCovington@gmail.com",
   phone: "+1 985-302-5033",
   phoneHref: "tel:+19853025033",

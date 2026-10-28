@@ -61,14 +61,31 @@ async function startApp(extraEnv) {
   const port = await availablePort();
   const child = spawn(
     process.execPath,
-    [
-      "node_modules/next/dist/bin/next",
-      "start",
-      "--hostname",
-      "127.0.0.1",
-      "--port",
-      String(port),
-    ],
+    process.env.TEST_TARGET === "pages"
+      ? [
+          "node_modules/wrangler/bin/wrangler.js",
+          "pages",
+          "dev",
+          "out",
+          "--ip",
+          "127.0.0.1",
+          "--port",
+          String(port),
+          "--inspector-port",
+          "0",
+          ...Object.entries(extraEnv).flatMap(([name, value]) => [
+            "--binding",
+            `${name}=${value}`,
+          ]),
+        ]
+      : [
+          "node_modules/next/dist/bin/next",
+          "start",
+          "--hostname",
+          "127.0.0.1",
+          "--port",
+          String(port),
+        ],
     {
       env: {
         ...process.env,
@@ -88,8 +105,8 @@ async function startApp(extraEnv) {
     output += chunk;
   });
   const url = `http://127.0.0.1:${port}`;
-  for (let attempt = 0; attempt < 100; attempt++) {
-    if (child.exitCode !== null) throw new Error(`Next.js exited: ${output}`);
+  for (let attempt = 0; attempt < 200; attempt++) {
+    if (child.exitCode !== null) throw new Error(`Preview exited: ${output}`);
     try {
       if ((await fetch(url)).ok) return url;
     } catch {
@@ -97,7 +114,7 @@ async function startApp(extraEnv) {
     }
     await delay(100);
   }
-  throw new Error(`Next.js did not start: ${output}`);
+  throw new Error(`Preview did not start: ${output}`);
 }
 
 before(async () => {

@@ -43,31 +43,51 @@ PHP `mail()` is replaced by `POST /api/contact`, using [Nodemailer SMTP](https:/
 | `SMTP_USER`, `SMTP_PASSWORD` | Provider credentials; supply both together. May be omitted for a network relay that does not require authentication. |
 | `CONTACT_FROM` | Sender address approved by the provider. Required. |
 | `CONTACT_TO` | Recipient; defaults to the original `ReviveCovington@gmail.com`. |
-| `SITE_URL` | Canonical public origin for SEO and form origin checking; defaults to `https://www.revivephonerepair.com`. |
+| `SITE_URL` | Canonical public origin for SEO and form origin checking; defaults to `https://revivephonerepair.com`. |
 
 Visitors’ addresses are used only for `Reply-To`; recipients and sender come from server configuration. The endpoint validates fields, limits request size, rejects foreign browser origins, and preserves the original hidden anti-spam field. Configure rate limiting or bot protection for `/api/contact` at your hosting platform before opening it to public traffic. The honeypot is basic filtering, not a distributed rate limiter.
 
 Keep `.env.local` out of Git. SMTP settings must never use a `NEXT_PUBLIC_` prefix. Production delivery needs an authorized sender and provider credentials; tests exercise local SMTP behavior, not real inbox delivery.
 
-## Deploy
+## Cloudflare Pages deployment
 
-Use a Node.js host that supports [Next.js](https://nextjs.org/docs/app/getting-started/deploying), such as Vercel or a server running:
+Target custom domain: `https://revivephonerepair.com`. Pages project: `revive-phone-repair`. Preview: [revive-phone-repair.pages.dev](https://revive-phone-repair.pages.dev).
+
+The Pages build exports an isolated copy of the Next.js pages to `out/`, then bundles the shared contact handler as a Pages advanced-mode `_worker.js`. The normal Next.js development server remains available. `_routes.json` limits Function execution to `/api/*`; the other pages and assets are served by Pages. `_redirects` preserves the old PHP/HTML URLs and their query strings.
 
 ```sh
-npm ci
-npm run build
-npm start
+npm run build:pages
+npm run preview:pages
+npm run test:pages
 ```
 
-Set environment variables before building/running. The default port is `3000`; set `PORT` to override. Static-only hosting or PHP-only Apache cannot run the contact endpoint. No Apache rewrite rules or PHP runtime are needed.
+The same 12 HTTP/SMTP tests run against the actual Cloudflare runtime. Test email is captured locally. No real inboxes are contacted by the tests.
 
-Old `/index`, `/location`, and `.php`/`.html` page URLs permanently redirect to their Next.js equivalents, preserving query strings. Image URLs under `/css/img/` and favicon URLs remain available. Next.js generates the sitemap, robots, and web manifest. Fonts are bundled locally.
+This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. After signing into Wrangler on an authorized machine, deploy the current checkout with:
+
+```sh
+npm run deploy:pages
+```
+
+The command targets Pages' `main` production deployment branch; the repository's application source remains on `develop`. Alternatively, zip the **contents** of `out/` and upload that ZIP through the Pages dashboard. Never upload the repository, `.env` files, or `node_modules`.
+
+Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is tracked in `wrangler.jsonc`; dashboard uploads use the project's runtime settings. Cloudflare's [static Next.js guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/) and [advanced-mode Function guide](https://developers.cloudflare.com/pages/functions/advanced-mode/) describe this setup.
+
+### Quote email setup
+
+In Pages → Settings → Variables and Secrets, add the SMTP configuration listed above. Store `SMTP_PASSWORD` as an encrypted secret. The default recipient remains `ReviveCovington@gmail.com`; use a sender authorized by the mail provider. Use port 465 with `SMTP_SECURE=true`, or port 587 with STARTTLS and `SMTP_REQUIRE_TLS=true`. Redeploy after changing runtime settings. Until configured, the form displays direct email/phone alternatives and does not claim that a message was delivered.
+
+### Standard Node.js hosting
+
+The app can also run on a conventional Node.js host with `npm ci`, `npm run build`, and `npm start`. Set runtime variables before starting it. Static-only or PHP-only hosting cannot run its Next.js contact route; Cloudflare Pages uses the bundled Function instead. Fonts and images are hosted locally.
 
 ## Structure
 
 - `src/app/`: pages, metadata, shared styles, contact endpoint.
 - `src/components/`: navigation, service catalog, contact form, footer.
-- `src/lib/site.ts`: business content, contact details, map links.
+- `src/lib/`: business details, service content, shared contact request validation/delivery.
+- `cloudflare/worker.ts`: Pages Function adapter.
+- `scripts/build-pages.mjs`: isolated static export and Function bundling.
 - `public/`: original photos, logo, social icons, favicons.
 - `tests/`: production HTTP and local SMTP integration checks.
 
