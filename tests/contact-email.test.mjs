@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -8,44 +8,26 @@ import { build } from "esbuild";
 
 const directory = await mkdtemp(join(tmpdir(), "revive-email-test-"));
 const output = join(directory, "email.mjs");
-const smtpMock = join(directory, "smtp-mock.mjs");
-await writeFile(
-  smtpMock,
-  `
-export const state = { sent: [], transports: [], closed: 0, send: undefined };
-export default {
-  createTransport(options) {
-    state.transports.push(options);
-    return {
-      async sendMail(message) {
-        if (state.send) return state.send(message);
-        state.sent.push(message);
-        return { accepted: [message.to], rejected: [] };
-      },
-      close() { state.closed++; }
-    };
+const originalFetch = globalThis.fetch;
+const apiState = { sent: [], requests: [], send: undefined };
+globalThis.fetch = async (url, options) => {
+  if (url !== "https://api.resend.com/emails") {
+    if (typeof url === "string" && url.startsWith("data:"))
+      return originalFetch(url, options);
+    throw new Error("Unexpected network request in local-only email test.");
   }
+  const message = JSON.parse(options.body);
+  apiState.requests.push({ url, options });
+  if (apiState.send) return apiState.send(message, options);
+  apiState.sent.push(message);
+  return Response.json({ id: "test-email-id" });
 };
-`,
-);
-const { state: smtpState } = await import(pathToFileURL(smtpMock));
 await build({
   entryPoints: ["cloudflare/contact-email.ts"],
   outfile: output,
   bundle: true,
   format: "esm",
   platform: "node",
-  plugins: [
-    {
-      name: "local-only-smtp",
-      setup(build) {
-        build.onResolve({ filter: /^nodemailer$/ }, () => ({
-          path: smtpMock,
-          external: true,
-        }));
-      },
-    },
-  ],
 });
 const { default: worker } = await import(pathToFileURL(output));
 const pagesOutput = join(directory, "pages.cjs");
@@ -57,7 +39,10 @@ await build({
   platform: "node",
 });
 const pages = (await import(pathToFileURL(pagesOutput))).default.default;
-after(() => rm(directory, { recursive: true, force: true }));
+after(async () => {
+  globalThis.fetch = originalFetch;
+  await rm(directory, { recursive: true, force: true });
+});
 
 const quote = {
   location: "covington",
@@ -83,14 +68,13 @@ const request = (data = quote, headers = {}) =>
     body: JSON.stringify(data),
   });
 function environment(overrides = {}) {
-  smtpState.sent = [];
-  smtpState.transports = [];
-  smtpState.closed = 0;
-  smtpState.send = undefined;
-  const sent = smtpState.sent;
+  apiState.sent = [];
+  apiState.requests = [];
+  apiState.send = undefined;
+  const sent = apiState.sent;
   const env = {
     CONTACT_EMAIL_ENABLED: "true",
-    SMTP_PASSWORD: "test only fake pass",
+    RESEND_API_KEY: " re_test_only_fake_key ",
     CONTACT_RATE_LIMITER: { limit: async () => ({ success: true }) },
     CONTACT_SITE_LIMITER: { limit: async () => ({ success: true }) },
     ...overrides,
@@ -150,24 +134,19 @@ test("Cloudflare mail preserves quote details and ignores visitor-supplied recip
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.deepEqual(await response.json(), { ok: true });
   assert.equal(sent.length, 1);
-  assert.equal(sent[0].to, "revivecovington@gmail.com");
+  assert.deepEqual(sent[0].to, ["revivecovington@gmail.com"]);
   assert.equal(
     sent[0].from,
-    "REViVE website quotes <revivecovington@gmail.com>",
+    "REViVE website quotes <quotes@notifications.revivephonerepair.com>",
   );
-  assert.equal(smtpState.transports[0].host, "smtp.gmail.com");
-  assert.equal(smtpState.transports[0].port, 465);
-  assert.equal(smtpState.transports[0].secure, true);
-  assert.equal(smtpState.transports[0].requireTLS, true);
-  assert.deepEqual(smtpState.transports[0].auth, {
-    user: "revivecovington@gmail.com",
-    pass: "testonlyfakepass",
-  });
-  assert.equal(smtpState.closed, 1);
-  assert.deepEqual(sent[0].replyTo, {
-    address: quote.email,
-    name: "Quote Visitor",
-  });
+  const { url, options } = apiState.requests[0];
+  assert.equal(url, "https://api.resend.com/emails");
+  assert.equal(options.method, "POST");
+  assert.equal(options.headers.Authorization, "Bearer re_test_only_fake_key");
+  assert.equal(options.redirect, "manual");
+  assert.ok(options.signal instanceof AbortSignal);
+  assert.equal(sent[0].reply_to, quote.email);
+  assert.ok(sent[0].text.includes("Quote Visitor"));
   for (const value of [
     quote.phone,
     "Battery replacement",
@@ -181,8 +160,8 @@ test("Cloudflare mail preserves quote details and ignores visitor-supplied recip
 test("Cloudflare mail stays unavailable while activation or required bindings are missing", async () => {
   for (const patch of [
     { CONTACT_EMAIL_ENABLED: "false" },
-    { SMTP_PASSWORD: undefined },
-    { SMTP_PASSWORD: "   " },
+    { RESEND_API_KEY: undefined },
+    { RESEND_API_KEY: "   " },
     { CONTACT_RATE_LIMITER: undefined },
     { CONTACT_SITE_LIMITER: undefined },
   ]) {
@@ -199,13 +178,26 @@ test("Cloudflare mail failures never return success or expose provider details",
     async () => {
       throw new Error("private provider details");
     },
-    async () => ({ accepted: [], rejected: ["revivecovington@gmail.com"] }),
+    async () =>
+      Response.json({ message: "private provider details" }, { status: 403 }),
+    async () => Response.json({ message: "quota exceeded" }, { status: 429 }),
+    async () =>
+      new Response(null, {
+        status: 302,
+        headers: { Location: "https://unrelated.example.test" },
+      }),
+    async () => Response.json({}),
+    async () => Response.json({ id: " " }),
+    async () => new Response("not json"),
+    async () => {
+      throw new DOMException("Request timed out", "TimeoutError");
+    },
   ]) {
     const { env } = environment();
-    smtpState.send = send;
+    apiState.send = send;
     const response = await worker.fetch(request(), env);
     assert.equal(response.status, 502);
-    assert.equal(smtpState.closed, 1);
+
     const body = await response.text();
     assert.match(body, /couldn’t send/);
     assert.doesNotMatch(body, /private provider details|ok.*true/);

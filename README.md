@@ -32,7 +32,7 @@ npm test
 
 ## Email setup
 
-Production uses `POST /api/contact` → the private `revive-contact-email` Worker through a `CONTACT_EMAIL` service binding. The Worker sends through Gmail SMTP over TLS on port 465. Sender and recipient are fixed to `revivecovington@gmail.com`, with the visitor’s address in `Reply-To`. A dedicated Gmail app password is stored only as the encrypted Worker secret `SMTP_PASSWORD`. This uses the existing Workers Free plan and does not need Cloudflare Email Sending or changes to mail DNS. See the activation checklist below: sending is currently paused.
+Production uses `POST /api/contact` → the private `revive-contact-email` Worker through a `CONTACT_EMAIL` service binding. The Worker sends through the Resend HTTPS API using `quotes@notifications.revivephonerepair.com`. The recipient is fixed to `revivecovington@gmail.com`, with the visitor’s address in `Reply-To`. A sending-only API key restricted to this notification domain is stored as the encrypted Worker secret `RESEND_API_KEY`. This uses Workers Free and Resend Free without requiring Gmail credentials. Delivery was activated and verified through the live form on October 29, 2026; see the operational notes below.
 
 For local development or a conventional Node.js host, [Nodemailer SMTP](https://nodemailer.com/smtp) remains available. Set these server environment variables:
 
@@ -49,7 +49,7 @@ For local development or a conventional Node.js host, [Nodemailer SMTP](https://
 
 Visitors’ addresses are used only for `Reply-To`; recipients and sender come from server configuration. The endpoint validates fields, limits request size, rejects foreign browser origins, and preserves the original hidden anti-spam field. The private email Worker adds rate limits of 5 requests per minute per visitor IP and 30 per minute for the site. These limits are approximate and apply separately in each Cloudflare location; they are not a strict worldwide quota. Shared IPs share a limit. SMTP-only hosting needs equivalent rate limiting or bot protection before enabling delivery.
 
-Keep `.env.local` out of Git. SMTP settings must never use a `NEXT_PUBLIC_` prefix. SMTP delivery needs an authorized sender and provider credentials; tests exercise local SMTP behavior and mocked Gmail sends, not real inbox delivery.
+Keep `.env.local` out of Git. SMTP settings must never use a `NEXT_PUBLIC_` prefix. SMTP delivery needs an authorized sender and provider credentials; tests exercise local SMTP behavior and mocked Resend API responses, not real inbox delivery.
 
 ## Cloudflare Pages deployment
 
@@ -65,7 +65,7 @@ npm run preview:pages
 npm run test:pages
 ```
 
-The suite runs 14 HTTP/SMTP/SEO integration checks against the Cloudflare runtime and 10 email Worker/service adapter checks. It covers fixed recipients, Reply-To, paused delivery, rate-limit failures, and immutable service response headers. Test mail is captured locally or mocked; no real inboxes are contacted.
+The suite runs 14 HTTP/SMTP/SEO integration checks against the Cloudflare runtime and 11 email Worker/service adapter/runtime checks. It covers fixed recipients, Reply-To, paused delivery, rate-limit failures, and immutable service response headers. Test mail is captured locally or mocked; no real inboxes are contacted.
 
 This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. This machine has a separate, approved Wrangler profile named `revive-phone-repair` for the client account. The deploy scripts explicitly select it; the personal default profile is unchanged. On another machine, create the authorized client profile with `wrangler auth create revive-phone-repair`. Deploy the current checkout with:
 
@@ -78,28 +78,31 @@ The command targets Pages' `main` production deployment branch; the repository's
 
 Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is tracked in `wrangler.jsonc`; its production environment binds `CONTACT_EMAIL` to the private Worker. Preview/local builds omit this live mail binding. Dashboard uploads use the project's runtime settings. Cloudflare's [static Next.js guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/) and [advanced-mode Function guide](https://developers.cloudflare.com/pages/functions/advanced-mode/) describe this setup.
 
-### Quote email activation — Gmail
+### Quote email activation — Resend
 
-On October 29, 2026, the client chose the existing `ReviveCovington@gmail.com` account instead of a Cloudflare paid subscription. The recipient was already verified in Cloudflare, but that verification is not Gmail SMTP authorization.
+The private `revive-contact-email` Worker uses Resend with a dedicated sending subdomain, `notifications.revivephonerepair.com`, in the North Virginia region. The provider is managed through the developer’s Resend account; give the client their own administrator access for handover.
 
-- The private `revive-contact-email` Worker is deployed with Gmail SMTP and both rate limiters. It has no public workers.dev URL, preview URL, or external route.
-- Production Pages calls it through the `CONTACT_EMAIL` binding. `CONTACT_EMAIL_ENABLED` remains `false` until the Gmail credential is added and a test is ready.
-- Sender and recipient are fixed in code. Only the customer’s `Reply-To` and validated quote content vary.
-- No Cloudflare paid plan was purchased. Existing MX, SPF, and mail-server routing remain unchanged.
+- The Worker has no public workers.dev URL, preview URL, or external route. Production Pages calls it through the `CONTACT_EMAIL` binding.
+- `CONTACT_EMAIL_ENABLED` is `true`. The three sending DNS records are verified, and `RESEND_API_KEY` is stored as an encrypted production Worker secret.
+- Sender and recipient are fixed in the Resend adapter. Only the customer’s `Reply-To` and validated quote content vary.
+- The existing apex MX/SPF and mail-server routing must be preserved. Resend receiving stays disabled.
+- No paid subscription is required. Resend Free currently allows 3,000 emails per month and 100 per day. Quota exhaustion returns a form error; these rate limits do not guarantee the free quota cannot be exhausted.
 
-**Finish activation:**
+**Configuration and recovery:**
 
-1. The client signs into [Google App Passwords](https://myaccount.google.com/apppasswords) as `ReviveCovington@gmail.com`, with 2-Step Verification enabled, and creates an app password named `REViVE website`. The client must complete credential creation and any Google security prompts. Do not use the normal account password or paste credentials into chat/Git.
-2. In Cloudflare → Workers & Pages → `revive-contact-email` → Settings → Runtime variables and secrets → Add variable, select **Secret**, enter name **SMTP_PASSWORD**, paste the app password into its value, and deploy/save. This belongs on the private Worker, not the Pages project. Spaces in Google’s displayed app password are removed by the adapter. Alternatively, the account owner can enter it at the hidden prompt from `npx wrangler secret put SMTP_PASSWORD --config cloudflare/email.wrangler.jsonc --profile revive-phone-repair`.
-3. Confirm the secret name exists without exposing its value. Set `CONTACT_EMAIL_ENABLED` to `"true"` in `cloudflare/email.wrangler.jsonc`, run `npm run typecheck` and `node --test tests/contact-email.test.mjs`, then `npm run deploy:email`. Commit/push the activation change. Pages does not need rebuilding.
-4. Submit one clearly labelled test quote while the client can check Gmail. Confirm it reaches Inbox or Spam, includes every quote field, and Reply addresses the customer. A successful API response proves SMTP acceptance, not inbox receipt. If Google rejects authentication, verify the correct account/app password; do not weaken TLS or disable account protections.
-5. If delivery fails, return the flag to `"false"` and redeploy while investigating. The form keeps direct email/phone alternatives and never reports delivery on an SMTP rejection.
+1. Verify `notifications.revivephonerepair.com` in Resend using the exact DNS records shown by its dashboard. The current setup requires a TXT record at `resend._domainkey.notifications`, a DNS-only CNAME `rsend.notifications` → `rsend.forge.rmta.net`, and a DNS-only CNAME `send.notifications` → `send.forge.rmta.net`. Do not replace the apex mail records or enable inbound mail.
+2. Create a key named `REViVE website quotes` with **Sending access**, restricted to `notifications.revivephonerepair.com`. Store its value as encrypted `RESEND_API_KEY` on the private Worker, never in Git, client JavaScript, or chat. The secret can be entered in the Cloudflare dashboard or the hidden prompt from `npx wrangler secret put RESEND_API_KEY --config cloudflare/email.wrangler.jsonc --profile revive-phone-repair`.
+3. Confirm the secret name exists without exposing its value. Set `CONTACT_EMAIL_ENABLED` to `"true"` in `cloudflare/email.wrangler.jsonc`, run `npm run typecheck` and `node --test tests/contact-email.test.mjs tests/contact-resend-runtime.test.mjs`, then `npm run deploy:email`. Commit/push the activation change. Pages does not need rebuilding.
+4. With permission, submit one clearly labelled test quote to the client’s Gmail. Check Resend’s delivery event, then ask the client to confirm Inbox/Spam placement and that Reply addresses the customer. A successful API response proves provider acceptance; a delivered event proves acceptance by the receiving mail server, not inbox placement.
+5. If delivery fails, return the flag to `"false"` and redeploy while investigating. The form keeps direct email/phone alternatives and never reports success on a provider rejection or malformed response.
 
-App passwords can be revoked by the client. Google password changes revoke app passwords, so create a new one and replace the encrypted Worker secret if the account password changes. Gmail sending limits still apply; revisit the provider if volume grows.
+**Verified live on October 29, 2026:** Worker version `abbbdbca-6a11-4f86-b3f1-b7e6062ba53b` was deployed with the activation flag enabled. The browser form displayed its success confirmation. Exactly one test email was accepted by Resend, ID `01a184c2-ed14-7b57-8a6f-d4ab782456d7`, with a **Delivered** event at 08:05 JST (October 28, 23:05 UTC). All quote fields were present, and Reply-To matched the test submitter. Earlier attempts failed before reaching Resend because Workers does not support `redirect: "error"`; the adapter now uses `manual`, rejects non-success responses, and has a local workerd regression test. Gmail inbox/spam placement has not been checked by the client.
 
-**There is no queue or saved-lead database.** Unavailable/failed submissions are not stored or sent later. Visitors must email/call directly or retry after activation. Do not tell the client quote delivery is live until the final inbox test succeeds.
+The adapter uses a 15-second timeout and does not automatically retry ambiguous failures. API keys can be revoked in Resend and replaced in Cloudflare. Existing local/Node.js SMTP tests remain separate from this production adapter.
 
-References: [Google app password setup](https://support.google.com/accounts/answer/185833), [Cloudflare Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/), and [rate-limit scope](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+**There is no queue or saved-lead database.** Unavailable/failed submissions are not stored or sent later. Visitors must email/call directly or retry after activation. Do not describe inbox receipt as confirmed until the client checks it.
+
+References: [Resend domain setup](https://resend.com/docs/dashboard/domains/introduction), [Resend pricing](https://resend.com/pricing), [Cloudflare Worker secrets](https://developers.cloudflare.com/workers/configuration/secrets/), and [rate-limit scope](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
 
 ### Search and AI discovery
 
@@ -133,6 +136,6 @@ The app can also run on a conventional Node.js host with `npm ci`, `npm run buil
 
 Business claims, testimonials, warranty, and service descriptions follow the client’s GoDaddy reference. Address, phone, email, and shop photos are retained from the original repository.
 
-The quote form sends first/last name, email, optional phone, service, preferred date/contact time, and device notes to the configured mailbox. Preferred dates are requests, not confirmed bookings. Existing name/message API submissions remain supported. Real delivery remains paused pending the encrypted Gmail app password and an inbox test with the client.
+The quote form sends first/last name, email, optional phone, service, preferred date/contact time, and device notes to the configured mailbox. Preferred dates are requests, not confirmed bookings. Existing name/message API submissions remain supported. Production delivery is active through Resend. The live form test succeeded and Resend recorded delivery to the client’s Gmail; inbox versus spam placement still requires the recipient’s check.
 
 Format source with `npx prettier --write src tests tailwind.config.ts postcss.config.mjs`.

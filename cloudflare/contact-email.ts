@@ -1,18 +1,18 @@
 import { handleContact } from "../src/lib/contact";
-import { createSmtpSender } from "../src/lib/contact-smtp";
+import { createResendSender } from "../src/lib/contact-resend";
 
 type RateLimiter = {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 };
 export type EmailEnvironment = {
-  SMTP_PASSWORD?: string;
+  RESEND_API_KEY?: string;
   CONTACT_RATE_LIMITER?: RateLimiter;
   CONTACT_SITE_LIMITER?: RateLimiter;
   CONTACT_EMAIL_ENABLED?: string;
 };
 
 // This Worker is private: Pages calls it through the CONTACT_EMAIL service binding.
-// Gmail sender and recipient are fixed here, never supplied by a visitor.
+// The email adapter fixes the sender and recipient; visitors cannot override them.
 export default {
   async fetch(
     request: Request,
@@ -30,17 +30,7 @@ export default {
         status: 405,
         headers: { Allow: "POST", "Cache-Control": "no-store" },
       });
-    const sender = createSmtpSender({
-      SMTP_HOST: "smtp.gmail.com",
-      SMTP_PORT: "465",
-      SMTP_SECURE: "true",
-      SMTP_REQUIRE_TLS: "true",
-      SMTP_USER: "revivecovington@gmail.com",
-      // Google displays app passwords in groups. Accept pastes with those spaces.
-      SMTP_PASSWORD: environment.SMTP_PASSWORD?.replace(/\s/g, ""),
-      CONTACT_FROM: "REViVE website quotes <revivecovington@gmail.com>",
-      CONTACT_TO: "revivecovington@gmail.com",
-    });
+    const sender = createResendSender(environment.RESEND_API_KEY);
     if (
       environment.CONTACT_EMAIL_ENABLED !== "true" ||
       !sender ||
