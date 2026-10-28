@@ -1,11 +1,13 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ServiceCatalog } from "@/components/service-catalog";
+import { servicePages } from "@/lib/service-pages";
 
-export const metadata: Metadata = {
-  title: "Repair & Buyback Services",
-  alternates: { canonical: "/services" },
-};
+export const metadata = pageMetadata(
+  "Phone Repair Services in Covington, LA",
+  "Explore screen repair, battery and charging repair, water damage diagnostics, data recovery, and phone buyback at REViVE in Covington, LA.",
+  "/services",
+);
 
 export default function Page() {
   return (
@@ -74,6 +76,22 @@ export default function Page() {
         }}
       >
         <ServiceCatalog />
+        <nav aria-label="Repair service details" className="mt-10">
+          <h2 className="text-2xl">
+            Explore repair & buyback options in Covington
+          </h2>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {servicePages.map((service) => (
+              <Link
+                key={service.slug}
+                className="rounded-full border border-border px-5 py-3 text-sm underline"
+                href={`/services/${service.slug}`}
+              >
+                {service.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
       </section>
       <section
         aria-labelledby="services-cta-heading"

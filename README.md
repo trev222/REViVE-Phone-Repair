@@ -63,7 +63,7 @@ npm run preview:pages
 npm run test:pages
 ```
 
-The same 12 HTTP/SMTP tests run against the actual Cloudflare runtime. Test email is captured locally. No real inboxes are contacted by the tests.
+The same 14 HTTP/SMTP/SEO tests run against the actual Cloudflare runtime. Test email is captured locally. No real inboxes are contacted by the tests.
 
 This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. After signing into Wrangler on an authorized machine, deploy the current checkout with:
 
@@ -78,6 +78,18 @@ Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is t
 ### Quote email setup
 
 In Pages → Settings → Variables and Secrets, add the SMTP configuration listed above. Store `SMTP_PASSWORD` as an encrypted secret. The default recipient remains `ReviveCovington@gmail.com`; use a sender authorized by the mail provider. Use port 465 with `SMTP_SECURE=true`, or port 587 with STARTTLS and `SMTP_REQUIRE_TLS=true`. Redeploy after changing runtime settings. Until configured, the form displays direct email/phone alternatives and does not claim that a message was delivered.
+
+### Search and AI discovery
+
+All ten public pages have unique titles and descriptions, production canonical URLs, Open Graph and Twitter card metadata, and pre-rendered HTML. Four service detail pages cover screen repair, battery/charging repair, water damage/data recovery, and phone buyback. The service index and related-service links make each page discoverable without interacting with the service selector.
+
+JSON-LD identifies the local business, address, phone, public hours, social profiles, and website. Service pages also include Service and BreadcrumbList data. Facts match the visible site; no invented prices or ratings are included. Keep business details and opening hours consistent with the client's Google Business Profile when they change.
+
+`/sitemap.xml` lists the ten canonical pages. `/robots.txt` permits search indexing and explicitly permits OAI-SearchBot, Claude-SearchBot, and PerplexityBot while excluding the contact API. Cloudflare AI Crawl Control was checked: the individual block switches for major search/AI search crawlers were off. Successful requests with their user-agent headers were checked; this is not a guarantee of access from every crawler IP or future indexing.
+
+Cloudflare has an enabled redirect rule named `Canonical www to revivephonerepair.com`, returning 308 from `https://www.revivephonerepair.com/*` to the corresponding apex URL and preserving query strings. The Pages preview retains production canonical URLs.
+
+The domain property is verified in Google Search Console using a DNS TXT record. Google successfully processed the sitemap and discovered all ten pages on October 28, 2026. Its live Rich Results Test validated LocalBusiness, Organization, and BreadcrumbList data on the screen-repair page; the only non-critical recommendation was an optional `priceRange`, omitted until pricing is confirmed. Keep the verification record to retain access. Give the client's own Google account independent verified-owner access before handover; a managing account should not remain their only owner. Search indexing and AI citations are determined by the search providers, not guaranteed by metadata or an AI-specific text file.
 
 ### Standard Node.js hosting
 

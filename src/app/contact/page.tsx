@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
 
-export const metadata: Metadata = {
-  title: "Contact REViVE",
-  alternates: { canonical: "/contact" },
-};
+export const metadata = pageMetadata(
+  "Contact REViVE & Get a Repair Quote",
+  "Request a phone repair or buyback quote from REViVE in Covington, LA. Call 985-302-5033 or email ReviveCovington@gmail.com with your device details.",
+  "/contact",
+);
 
 export default function Page() {
   return (

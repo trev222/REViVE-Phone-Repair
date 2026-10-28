@@ -12,9 +12,22 @@ import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 import { SiteHeader } from "@/components/site-header";
 import { site } from "@/lib/site";
+import { businessSchema } from "@/lib/seo";
+import { StructuredData } from "@/components/structured-data";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   title: {
     default: "Home - Revive Phone Repair",
     template: "%s - Revive Phone Repair",
@@ -47,6 +60,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
+        <StructuredData data={businessSchema} />
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>

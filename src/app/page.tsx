@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Smartphone Buyback & Repair",
-  alternates: { canonical: "/" },
-};
+export const metadata = pageMetadata(
+  "Phone Repair & Buyback in Covington, LA",
+  "Phone screen repair, battery replacement, water damage diagnostics, and smartphone buyback at REViVE in Covington, Louisiana. Call 985-302-5033.",
+  "/",
+);
 
 export default function Page() {
   return (
@@ -20,7 +21,7 @@ export default function Page() {
                 className="font-heading text-sm font-medium uppercase tracking-[0.08em] text-secondary-foreground"
                 style={{ whiteSpace: "pre-line" }}
               >
-                Buyback + repair, same place
+                Phone repair & buyback · Covington, LA
               </p>
               <h1
                 id="hero-heading"

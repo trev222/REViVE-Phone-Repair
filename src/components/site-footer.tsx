@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { site } from "@/lib/site";
 
 export function SiteFooter() {
   return (
@@ -108,12 +109,30 @@ export function SiteFooter() {
             >
               Walk-in and mail-in service available
             </p>
-            <p
-              className="mt-6 font-sans text-sm leading-6 text-accent-foreground"
-              style={{ whiteSpace: "pre-line" }}
-            >
-              Buyback + repair, handled by one team.
+            <address className="mt-4 text-sm not-italic leading-6">
+              <a className="underline" href={site.mapsUrl}>
+                {site.address}
+              </a>
+              <br />
+              <a className="underline" href={site.phoneHref}>
+                {site.phone}
+              </a>
+              <br />
+              <a className="break-all underline" href={`mailto:${site.email}`}>
+                {site.email}
+              </a>
+            </address>
+            <p className="mt-4 text-sm leading-6">
+              Mon–Fri: 10 am–5 pm
+              <br />
+              Sat: 10 am–3 pm · Sun: Closed
             </p>
+            <Link
+              href="/locations"
+              className="mt-3 inline-block text-sm underline"
+            >
+              Hours & directions
+            </Link>
           </div>
         </div>
       </div>

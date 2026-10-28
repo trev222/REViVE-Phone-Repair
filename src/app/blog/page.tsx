@@ -1,13 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { Arrow } from "@/components/arrow";
 
-export const metadata: Metadata = {
-  title: "Phone Repair Guides",
-  description:
-    "Prepare for your phone repair, battery replacement, or smartphone buyback at REViVE.",
-  alternates: { canonical: "/blog" },
-};
+export const metadata = pageMetadata(
+  "Phone Repair & Buyback Guides",
+  "Learn what to share for a repair quote, how to prepare your phone for a visit, and what to consider before selling a used smartphone to REViVE.",
+  "/blog",
+);
 
 const guides = [
   {

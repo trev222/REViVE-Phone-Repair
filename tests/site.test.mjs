@@ -228,7 +228,7 @@ test("original assets, sitemap, robots, and manifest are served", async () => {
   for (const path of assets)
     assert.equal((await fetch(origin + path)).status, 200, path);
   const sitemap = await (await fetch(origin + "/sitemap.xml")).text();
-  assert.equal((sitemap.match(/<loc>/g) || []).length, 6);
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 10);
   assert.match(
     await (await fetch(origin + "/robots.txt")).text(),
     /Sitemap: https?:\/\/.+\/sitemap.xml/,
@@ -241,6 +241,78 @@ test("original assets, sitemap, robots, and manifest are served", async () => {
 
 test("unknown pages return 404", async () => {
   assert.equal((await fetch(origin + "/does-not-exist")).status, 404);
+  assert.equal((await fetch(origin + "/services/does-not-exist")).status, 404);
+});
+
+test("every sitemap page has unique search metadata and consistent business data", async () => {
+  const sitemap = await (await fetch(origin + "/sitemap.xml")).text();
+  const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map(
+    (match) => match[1],
+  );
+  const titles = new Set();
+  const descriptions = new Set();
+  for (const url of urls) {
+    const response = await fetch(origin + new URL(url).pathname);
+    assert.equal(response.status, 200, url);
+    assert.notEqual(response.headers.get("x-robots-tag"), "noindex");
+    const html = await response.text();
+    const title = html.match(/<title>(.*?)<\/title>/)?.[1];
+    const description = html.match(
+      /<meta name="description" content="([^"]+)"/,
+    )?.[1];
+    assert.ok(title && description, url);
+    assert.ok(!titles.has(title), `Duplicate title: ${url}`);
+    assert.ok(!descriptions.has(description), `Duplicate description: ${url}`);
+    titles.add(title);
+    descriptions.add(description);
+    assert.ok(title.includes("REViVE Phone Repair"));
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    assert.equal(new URL(canonical).href, new URL(url).href);
+    assert.match(html, /<meta name="robots" content="index, follow"/);
+    assert.match(html, /property="og:url"/);
+    assert.match(html, /name="twitter:card" content="summary_large_image"/);
+    assert.equal((html.match(/<h1[ >]/g) || []).length, 1);
+    const schemas = [
+      ...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g),
+    ].flatMap((match) => JSON.parse(match[1])["@graph"] || []);
+    const business = schemas.find((item) => item["@type"] === "LocalBusiness");
+    assert.equal(business?.address.addressLocality, "Covington");
+    assert.equal(business?.telephone, "+1 985-302-5033");
+    assert.match(html, /70515 Highway 21 Unit 8, Covington, LA 70433/);
+    assert.ok(!business.aggregateRating, "No invented business rating");
+    if (new URL(url).pathname.startsWith("/services/")) {
+      const service = schemas.find((item) => item["@type"] === "Service");
+      assert.equal(service?.provider["@id"], business["@id"]);
+      const breadcrumbs = schemas.find(
+        (item) => item["@type"] === "BreadcrumbList",
+      );
+      assert.equal(breadcrumbs?.itemListElement.at(-1).item, url);
+    }
+  }
+});
+
+test("repair pages are discoverable through links and search crawlers can read the site", async () => {
+  const html = await (await fetch(origin + "/services")).text();
+  const sitemap = await (await fetch(origin + "/sitemap.xml")).text();
+  for (const slug of [
+    "screen-repair",
+    "battery-charging-repair",
+    "water-damage-data-recovery",
+    "phone-buyback",
+  ]) {
+    assert.ok(html.includes(`href="/services/${slug}"`), slug);
+    assert.ok(sitemap.includes(`/services/${slug}</loc>`), slug);
+  }
+  const robots = await (await fetch(origin + "/robots.txt")).text();
+  for (const crawler of [
+    "*",
+    "OAI-SearchBot",
+    "Claude-SearchBot",
+    "PerplexityBot",
+  ])
+    assert.ok(robots.includes(`User-Agent: ${crawler}`), crawler);
+  assert.match(robots, /Disallow: \/api\//);
+  assert.doesNotMatch(robots, /Disallow: \/\s*(?:\n|$)/);
 });
 
 test("valid submissions reach only the configured local mailbox", async () => {

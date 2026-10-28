@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "About REViVE",
-  alternates: { canonical: "/about" },
-};
+export const metadata = pageMetadata(
+  "About Our Covington Phone Repair Shop",
+  "Meet REViVE Phone Repair in Covington, LA. Learn about our repair process, flat-rate quotes, smartphone buyback, and service for major phone brands.",
+  "/about",
+);
 
 export default function Page() {
   return (

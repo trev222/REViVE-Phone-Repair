@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { site } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Covington Location",
-  alternates: { canonical: "/locations" },
-};
+export const metadata = pageMetadata(
+  "Covington Phone Repair Shop: Hours & Directions",
+  "Visit REViVE at 70515 Highway 21 Unit 8, Covington, LA 70433. Find shop hours, directions, and contact details for phone repair and buyback.",
+  "/locations",
+);
 
 export default function LocationsPage() {
   return (
