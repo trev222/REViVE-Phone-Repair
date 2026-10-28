@@ -1,5 +1,7 @@
 # REViVE Phone Repair
 
+**Handover:** start with the [plain-English client guide](docs/CLIENT_GUIDE.md), download the [Word guide](docs/REViVE-Website-Guide.docx), or read the [technical handover for developers and AI agents](docs/AI_HANDOVER.md). The current website source is on **develop**; GitHub still opens the old **master** branch by default. Saving to GitHub does not publish the website.
+
 The client’s GoDaddy design rebuilt with Next.js App Router, React, TypeScript, and Tailwind CSS. Home, Services, About, Contact, and Guides reproduce its green/purple palette, rounded panels, typography, responsive navigation, service selector, and quote form. The Locations tab appears in desktop/mobile navigation and the footer; `/locations` shows the Covington shop's Google map, address, hours, phone number, and directions link.
 
 The source is independent of GoDaddy: no builder scripts, editor chrome, promotional badges, or remote font dependency. Questrial and Be Vietnam Pro are bundled locally. The exact client logo and repair hero are stored in `public/images/`; the original shop photos replace leftover solar images. The empty roofing guide page is replaced with phone-repair and buyback guidance. Unbuilt legal links and unconfigured social accounts are omitted; the original business email and real social links are retained.
@@ -129,7 +131,8 @@ The app can also run on a conventional Node.js host with `npm ci`, `npm run buil
 - `src/lib/`: business details, service content, shared contact request validation/delivery.
 - `cloudflare/worker.ts`: Pages Function adapter.
 - `cloudflare/contact-email.ts`: private, rate-limited Cloudflare email Worker.
-- `cloudflare/email.wrangler.jsonc`: fixed recipient, activation switch, and Worker deployment settings.
+- `cloudflare/email.wrangler.jsonc`: activation switch, rate limits, and Worker deployment settings.
+- `src/lib/contact-resend.ts`: production sender, recipient, and Resend delivery adapter.
 - `scripts/build-pages.mjs`: isolated static export and Function bundling.
 - `public/`: original photos, logo, social icons, favicons.
 - `tests/`: production HTTP and local SMTP integration checks.
