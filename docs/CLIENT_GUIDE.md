@@ -124,7 +124,7 @@ GitHub access lets you edit files. Separate account access is needed to publish,
 | --- | --- |
 | GitHub | `clayb1919` has a repository-only write invitation to accept. |
 | Cloudflare | Client account is associated with ReviveCovington@gmail.com. Each maintainer needs authorized deployment access. |
-| Resend | Managed through the developer's `voric41` team. Arrange suitable client access or a client-owned account before ending the maintenance arrangement. |
+| Resend | Admin invitation sent to ReviveCovington@gmail.com on October 29, 2026; awaiting acceptance. The developer still has access to the existing `voric41` team. |
 | Google Search Console and Bing | Set up through the developer's Google account. Arrange the client's own access; Google should have a client-controlled verified owner. |
 | Gmail | Client controls the destination mailbox. No Gmail password is stored in the website. |
 
@@ -143,6 +143,7 @@ Search metadata, a sitemap, and local-business information are already included.
 ### Finish the handover
 
 - Accept the GitHub invitation and open **develop**.
+- Accept the Resend invitation in the client's Gmail, sign in using that address, and confirm access before removing the developer from the team.
 - Confirm the client can read a quote and reply to the customer.
-- Arrange the Cloudflare, Resend, and search-tool access needed by the long-term maintainer.
+- Arrange the Cloudflare and search-tool access needed by the long-term maintainer.
 - Keep this guide updated when the setup changes. The [technical handover](https://github.com/trev222/REViVE-Phone-Repair/blob/develop/docs/AI_HANDOVER.md) gives an AI agent or developer the file map, commands, and recovery details.

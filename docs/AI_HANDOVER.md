@@ -94,7 +94,7 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 
 | Setting | Current value |
 | --- | --- |
-| Resend team | Developer-managed `voric41` team |
+| Resend team | Existing `voric41` team; client Admin invitation pending |
 | Verified sending domain | `notifications.revivephonerepair.com`, North Virginia region |
 | Sender | `REViVE website quotes <quotes@notifications.revivephonerepair.com>` |
 | Fixed recipient | `revivecovington@gmail.com` |
@@ -104,6 +104,8 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 | Activation | `CONTACT_EMAIL_ENABLED: "true"` in `cloudflare/email.wrangler.jsonc` |
 
 Sender/recipient are fixed in `src/lib/contact-resend.ts`. `CONTACT_TO` and `CONTACT_FROM` from the SMTP environment do not configure production Resend. Changing the public email in `site.ts` does not change delivery. Change the adapter and tests, deploy the email Worker, and update/publish public content separately if appropriate.
+
+**Client access handover:** with explicit approval, an **Admin** invitation was sent to `ReviveCovington@gmail.com` on October 29, 2026. Resend Team settings showed **Pending Admin** afterward. The team contains one domain, `notifications.revivephonerepair.com`. The client must accept through their own email and confirm their Resend access before the handover is complete. The existing `voric41@gmail.com` administrator remains; do not claim ownership/access has fully transferred or remove it while the invitation is pending. The invitation did not change the sending domain, API key, Cloudflare deployment, or billing plan.
 
 `RESEND_API_KEY` is a **Sending access** key restricted to the notification domain, named `REViVE website quotes`. Never print it, commit it, include it in a `NEXT_PUBLIC_` variable, or pass it as a visible shell argument. Rotate it through Resend and the Cloudflare dashboard or the hidden prompt:
 
@@ -142,7 +144,7 @@ Google Search Console and Bing were verified through the managing Google account
 - Last email implementation commit before this documentation: `8503cc1` (`Activate quote delivery through Resend`). Typecheck and all 11 email adapter/service/runtime checks passed then. The older 14 integration checks had passed previously; they were not rerun for that adapter-only change.
 - Live Worker version `abbbdbca-6a11-4f86-b3f1-b7e6062ba53b` was active with sending enabled at the October 29 check.
 - One authorized test quote submitted through the live form produced Resend ID `01a184c2-ed14-7b57-8a6f-d4ab782456d7`, status Delivered at October 28, 2026 23:05 UTC (October 29 08:05 JST). [Delivery record](https://resend.com/emails/01a184c2-ed14-7b57-8a6f-d4ab782456d7). Recipient Inbox/Spam placement remains for the client to confirm.
-- No paid plan was purchased. Existing inbound mail was preserved. Client access to Resend and independent search ownership still need arranging; do not treat this document as approval for those grants or a billing change.
+- No paid plan was purchased. Existing inbound mail was preserved. The client's Resend Admin invitation awaits acceptance; independent search ownership still needs arranging. This document does not authorize further access grants or a billing change.
 
 If the site breaks, use the last known working **production** deployment's rollback control in Cloudflare Pages, then revert the faulty source commit with a new commit on `develop` and publish the corrected source. Avoid resetting or force-pushing shared history. Inspect the chosen deployment and bindings before rollback; website and email Worker releases are independent.
 

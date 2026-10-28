@@ -82,7 +82,7 @@ Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is t
 
 ### Quote email activation — Resend
 
-The private `revive-contact-email` Worker uses Resend with a dedicated sending subdomain, `notifications.revivephonerepair.com`, in the North Virginia region. The provider is managed through the developer’s Resend account; give the client their own administrator access for handover.
+The private `revive-contact-email` Worker uses Resend with a dedicated sending subdomain, `notifications.revivephonerepair.com`, in the North Virginia region. The existing Resend team is `voric41`. An approved administrator invitation was sent to `ReviveCovington@gmail.com` on October 29, 2026 and is pending acceptance. The developer’s administrator access remains until the client accepts and the handover is completed; the sending setup is unchanged.
 
 - The Worker has no public workers.dev URL, preview URL, or external route. Production Pages calls it through the `CONTACT_EMAIL` binding.
 - `CONTACT_EMAIL_ENABLED` is `true`. The three sending DNS records are verified, and `RESEND_API_KEY` is stored as an encrypted production Worker secret.
