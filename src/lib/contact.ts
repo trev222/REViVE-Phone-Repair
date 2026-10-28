@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import { site } from "./site";
 
 export type ContactEnvironment = Partial<
@@ -15,6 +14,13 @@ export type ContactEnvironment = Partial<
     string
   >
 >;
+export type ContactEmail = {
+  replyTo: { name: string; address: string };
+  subject: string;
+  text: string;
+};
+export type ContactSender = (message: ContactEmail) => Promise<void>;
+
 const maximumBodyBytes = 24_000;
 
 function error(message: string, status: number) {
@@ -24,6 +30,7 @@ function error(message: string, status: number) {
 export async function handleContact(
   request: Request,
   environment: ContactEnvironment,
+  sendEmail?: ContactSender,
 ) {
   const origin = request.headers.get("origin");
   const requestUrl = new URL(request.url);
@@ -133,58 +140,26 @@ export async function handleContact(
   )
     return error("Please enter a valid preferred date.", 400);
 
-  const { SMTP_HOST, SMTP_USER, SMTP_PASSWORD, CONTACT_FROM } = environment;
-  const port = Number(environment.SMTP_PORT || "587");
-  if (
-    !SMTP_HOST ||
-    !CONTACT_FROM ||
-    !Number.isInteger(port) ||
-    port < 1 ||
-    port > 65535 ||
-    Boolean(SMTP_USER) !== Boolean(SMTP_PASSWORD)
-  ) {
+  if (!sendEmail) {
     return error(
       "The contact form is temporarily unavailable. Please email or call us directly.",
       503,
     );
   }
 
-  const transport = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port,
-    secure: environment.SMTP_SECURE
-      ? environment.SMTP_SECURE === "true"
-      : port === 465,
-    requireTLS: environment.SMTP_REQUIRE_TLS !== "false",
-    auth:
-      SMTP_USER && SMTP_PASSWORD
-        ? { user: SMTP_USER, pass: SMTP_PASSWORD }
-        : undefined,
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
-    disableFileAccess: true,
-    disableUrlAccess: true,
-  });
   try {
-    const result = await transport.sendMail({
-      from: CONTACT_FROM,
-      to: environment.CONTACT_TO || site.email,
+    await sendEmail({
       replyTo: { name, address: email },
       subject: "Revive my Phone!",
       text: `Location: Covington\nName: ${name}\nEmail: ${email}\nPhone: ${phone || "Not provided"}\nService: ${service ? serviceLabels[service] : "Not specified"}\nPreferred date: ${preferredDate || "Not specified"}\nBest time to reach visitor: ${timeWindow ? timeLabels[timeWindow] : "Not specified"}\n\nMessage:\n${message || "No additional details."}`,
     });
-    if (!result.accepted.length || result.rejected.length)
-      throw new Error("Recipient rejected");
     return Response.json({ ok: true });
   } catch {
-    // Do not log customer messages or SMTP credentials.
+    // Never log customer messages, addresses, or mail credentials.
     console.error("Contact email delivery failed.");
     return error(
       "We couldn’t send your message. Please try again or contact us directly.",
       502,
     );
-  } finally {
-    transport.close();
   }
 }

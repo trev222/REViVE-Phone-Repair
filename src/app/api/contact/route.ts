@@ -1,9 +1,10 @@
 import { handleContact } from "@/lib/contact";
+import { createSmtpSender } from "@/lib/contact-smtp";
 
 export const runtime = "nodejs";
 
 export function POST(request: Request) {
-  return handleContact(request, {
+  const environment = {
     SITE_URL: process.env.SITE_URL,
     SMTP_HOST: process.env.SMTP_HOST,
     SMTP_PORT: process.env.SMTP_PORT,
@@ -13,5 +14,6 @@ export function POST(request: Request) {
     SMTP_REQUIRE_TLS: process.env.SMTP_REQUIRE_TLS,
     CONTACT_FROM: process.env.CONTACT_FROM,
     CONTACT_TO: process.env.CONTACT_TO,
-  });
+  };
+  return handleContact(request, environment, createSmtpSender(environment));
 }

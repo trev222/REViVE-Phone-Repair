@@ -10,7 +10,8 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "build:pages": "node scripts/build-pages.mjs",
     "preview:pages": "wrangler pages dev out",
-    "deploy:pages": "npm run build:pages && wrangler pages deploy out --project-name revive-phone-repair --branch main",
+    "deploy:pages": "npm run build:pages && wrangler pages deploy out --project-name revive-phone-repair --branch main --profile revive-phone-repair",
+    "deploy:email": "wrangler deploy --config cloudflare/email.wrangler.jsonc --profile revive-phone-repair",
     "test:pages": "npm run build:pages && TEST_TARGET=pages node --test tests/*.test.mjs"
   },
   "engines": {

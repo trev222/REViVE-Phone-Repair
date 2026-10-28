@@ -32,7 +32,9 @@ npm test
 
 ## Email setup
 
-PHP `mail()` is replaced by `POST /api/contact`, using [Nodemailer SMTP](https://nodemailer.com/smtp). Set these server environment variables:
+Production uses `POST /api/contact` → the private `revive-contact-email` Worker through a `CONTACT_EMAIL` service binding. Its `EMAIL` binding can send only to `revivecovington@gmail.com`. The sender is `quotes@revivephonerepair.com`, with the visitor’s address in `Reply-To`. Native Cloudflare delivery needs no Gmail password. See the activation checklist below: sending is currently paused.
+
+For local development or a conventional Node.js host, [Nodemailer SMTP](https://nodemailer.com/smtp) remains available. Set these server environment variables:
 
 | Variable | Purpose |
 | --- | --- |
@@ -45,9 +47,9 @@ PHP `mail()` is replaced by `POST /api/contact`, using [Nodemailer SMTP](https:/
 | `CONTACT_TO` | Recipient; defaults to the original `ReviveCovington@gmail.com`. |
 | `SITE_URL` | Canonical public origin for SEO and form origin checking; defaults to `https://revivephonerepair.com`. |
 
-Visitors’ addresses are used only for `Reply-To`; recipients and sender come from server configuration. The endpoint validates fields, limits request size, rejects foreign browser origins, and preserves the original hidden anti-spam field. Configure rate limiting or bot protection for `/api/contact` at your hosting platform before opening it to public traffic. The honeypot is basic filtering, not a distributed rate limiter.
+Visitors’ addresses are used only for `Reply-To`; recipients and sender come from server configuration. The endpoint validates fields, limits request size, rejects foreign browser origins, and preserves the original hidden anti-spam field. The native email Worker adds rate limits of 5 requests per minute per visitor IP and 30 per minute for the site. These limits are approximate and apply separately in each Cloudflare location; they are not a strict worldwide quota. Shared IPs share a limit. SMTP-only hosting needs equivalent rate limiting or bot protection before enabling delivery.
 
-Keep `.env.local` out of Git. SMTP settings must never use a `NEXT_PUBLIC_` prefix. Production delivery needs an authorized sender and provider credentials; tests exercise local SMTP behavior, not real inbox delivery.
+Keep `.env.local` out of Git. SMTP settings must never use a `NEXT_PUBLIC_` prefix. SMTP delivery needs an authorized sender and provider credentials; tests exercise local SMTP behavior and mocked native sends, not real inbox delivery.
 
 ## Cloudflare Pages deployment
 
@@ -63,21 +65,40 @@ npm run preview:pages
 npm run test:pages
 ```
 
-The same 14 HTTP/SMTP/SEO tests run against the actual Cloudflare runtime. Test email is captured locally. No real inboxes are contacted by the tests.
+The suite runs 14 HTTP/SMTP/SEO integration checks against the Cloudflare runtime and 10 email Worker/service adapter checks. It covers fixed recipients, Reply-To, paused delivery, rate-limit failures, and immutable service response headers. Test mail is captured locally or mocked; no real inboxes are contacted.
 
-This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. After signing into Wrangler on an authorized machine, deploy the current checkout with:
+This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. This machine has a separate, approved Wrangler profile named `revive-phone-repair` for the client account. The deploy scripts explicitly select it; the personal default profile is unchanged. On another machine, create the authorized client profile with `wrangler auth create revive-phone-repair`. Deploy the current checkout with:
 
 ```sh
+npm run deploy:email
 npm run deploy:pages
 ```
 
 The command targets Pages' `main` production deployment branch; the repository's application source remains on `develop`. Alternatively, zip the **contents** of `out/` and upload that ZIP through the Pages dashboard. Never upload the repository, `.env` files, or `node_modules`.
 
-Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is tracked in `wrangler.jsonc`; dashboard uploads use the project's runtime settings. Cloudflare's [static Next.js guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/) and [advanced-mode Function guide](https://developers.cloudflare.com/pages/functions/advanced-mode/) describe this setup.
+Use compatibility date `2026-10-28` with `nodejs_compat`. The configuration is tracked in `wrangler.jsonc`; its production environment binds `CONTACT_EMAIL` to the private Worker. Preview/local builds omit this live mail binding. Dashboard uploads use the project's runtime settings. Cloudflare's [static Next.js guide](https://developers.cloudflare.com/pages/framework-guides/nextjs/deploy-a-static-nextjs-site/) and [advanced-mode Function guide](https://developers.cloudflare.com/pages/functions/advanced-mode/) describe this setup.
 
-### Quote email setup
+### Quote email activation — client handover
 
-In Pages → Settings → Variables and Secrets, add the SMTP configuration listed above. Store `SMTP_PASSWORD` as an encrypted secret. The default recipient remains `ReviveCovington@gmail.com`; use a sender authorized by the mail provider. Use port 465 with `SMTP_SECURE=true`, or port 587 with STARTTLS and `SMTP_REQUIRE_TLS=true`. Redeploy after changing runtime settings. Until configured, the form displays direct email/phone alternatives and does not claim that a message was delivered.
+Prepared October 28, 2026:
+
+- The destination `revivecovington@gmail.com` is **Verified** in Cloudflare Email Routing → Destination addresses.
+- The private `revive-contact-email` Worker is deployed, with its fixed-recipient email binding and both rate limiters. It has no public workers.dev URL, preview URL, or external route.
+- Production Pages calls this Worker through the `CONTACT_EMAIL` binding. `CONTACT_EMAIL_ENABLED` is deliberately `false` in `cloudflare/email.wrangler.jsonc`.
+- The sender domain is **not activated**. The account’s Email Sending dashboard requires Workers Paid; the free Email Routing onboarding proposes replacing apex MX/SPF records. Neither purchase nor mail migration was performed.
+- The existing MX to `mail.revivephonerepair.com`, existing SPF, and mail-server routing remain unchanged. No test email has been sent to the client and inbox receipt has not been confirmed.
+
+**Finish with the client on October 29:**
+
+1. Choose the sender setup. For Cloudflare’s separate Email Sending setup, obtain approval for the displayed Workers Paid subscription, then onboard `revivephonerepair.com`. Review only the required sending DNS records (`cf-bounce`, DKIM, and DMARC); preserve the existing incoming-mail MX and existing SPF/DMARC policies. Do not use apex Email Routing activation unless the client explicitly approves migrating incoming mail. An existing authorized SMTP provider is an alternative using the adapter above; switching production to it also requires appropriate rate limiting and removing the native service binding.
+2. Confirm Cloudflare reports the sender domain ready and the destination still verified. If using a dedicated sending subdomain instead, update the fixed sender in `cloudflare/contact-email.ts` and its test to match the verified domain.
+3. Set `CONTACT_EMAIL_ENABLED` to `"true"` in `cloudflare/email.wrangler.jsonc`, run `npm run typecheck` and `node --test tests/contact-email.test.mjs`, then `npm run deploy:email`. Commit/push the configuration change so later deployments preserve activation. The website itself does not need rebuilding for this flag change.
+4. With the client ready to check Gmail, submit one clearly labelled test quote using a real reply address you control. Confirm the message arrives in Inbox or Spam, contains every quote field, and Reply addresses the visitor. A successful API response means Cloudflare accepted the send; it does not prove inbox receipt.
+5. If delivery fails, return the flag to `"false"` and redeploy the Worker while investigating. The form shows direct email/phone alternatives and never reports delivery on a provider failure.
+
+**There is no queue or saved-lead database.** Unavailable/failed submissions are not stored or sent later. Visitors must email/call directly or retry after activation. Do not tell the client that quote delivery is live until the final test succeeds.
+
+References: [Cloudflare sending setup](https://developers.cloudflare.com/email-service/configuration/domains/), [verified destination pricing](https://developers.cloudflare.com/email-service/platform/pricing/), and [rate-limit scope](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
 
 ### Search and AI discovery
 
@@ -103,12 +124,14 @@ The app can also run on a conventional Node.js host with `npm ci`, `npm run buil
 - `src/components/`: navigation, service catalog, contact form, footer.
 - `src/lib/`: business details, service content, shared contact request validation/delivery.
 - `cloudflare/worker.ts`: Pages Function adapter.
+- `cloudflare/contact-email.ts`: private, rate-limited Cloudflare email Worker.
+- `cloudflare/email.wrangler.jsonc`: fixed recipient, activation switch, and Worker deployment settings.
 - `scripts/build-pages.mjs`: isolated static export and Function bundling.
 - `public/`: original photos, logo, social icons, favicons.
 - `tests/`: production HTTP and local SMTP integration checks.
 
 Business claims, testimonials, warranty, and service descriptions follow the client’s GoDaddy reference. Address, phone, email, and shop photos are retained from the original repository.
 
-The quote form sends first/last name, email, optional phone, service, preferred date/contact time, and device notes to the configured mailbox. Preferred dates are requests, not confirmed bookings. Existing name/message API submissions remain supported. SMTP credentials still need to be configured for real delivery.
+The quote form sends first/last name, email, optional phone, service, preferred date/contact time, and device notes to the configured mailbox. Preferred dates are requests, not confirmed bookings. Existing name/message API submissions remain supported. Real delivery remains paused pending sender-domain activation and an inbox test with the client.
 
 Format source with `npx prettier --write src tests tailwind.config.ts postcss.config.mjs`.
