@@ -84,6 +84,12 @@ export function SiteFooter() {
               </Link>
               <Link
                 className="font-sans text-sm text-accent-foreground transition-colors hover:text-primary"
+                href="/locations"
+              >
+                Locations
+              </Link>
+              <Link
+                className="font-sans text-sm text-accent-foreground transition-colors hover:text-primary"
                 href="/blog"
               >
                 Guides

@@ -30,34 +30,37 @@ export default function LocationsPage() {
           <a href={site.phoneHref} className="mt-6 underline">
             {site.phone}
           </a>
-          <Link
-            href="/contact"
-            className="mt-8 rounded-full bg-accent px-6 py-4 font-medium text-accent-foreground"
-          >
-            Get a quote
-          </Link>
+          <div className="mt-8 flex flex-wrap items-center gap-6">
+            <a
+              href={site.mapsUrl}
+              className="rounded-full bg-accent px-6 py-4 font-medium text-accent-foreground"
+            >
+              Get directions
+            </a>
+            <Link href="/contact" className="font-medium underline">
+              Get a quote
+            </Link>
+          </div>
         </section>
-        <img
-          className="min-h-[360px] rounded-[32px] object-cover"
-          src="/css/img/location2.JPG"
-          alt="REViVE Phone Repair’s Covington location"
-          width={4032}
-          height={3024}
-        />
+        <section
+          className="flex min-w-0 flex-col overflow-hidden rounded-[32px] border border-border bg-card"
+          aria-labelledby="location-map-heading"
+        >
+          <div className="px-8 py-6">
+            <h2 id="location-map-heading" className="text-2xl">
+              Find us on Google Maps.
+            </h2>
+          </div>
+          <iframe
+            className="min-h-[360px] w-full flex-1 border-0 sm:min-h-[450px]"
+            title="Map of REViVE Phone Repair in Covington"
+            src={site.mapsEmbed}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </section>
       </div>
-      <iframe
-        className="mt-8 h-[450px] w-full rounded-[32px] border-0"
-        title="Map of REViVE Phone Repair in Covington"
-        src={site.mapsEmbed}
-        loading="lazy"
-        allowFullScreen
-        referrerPolicy="no-referrer-when-downgrade"
-      />
-      <p className="mt-5">
-        <a className="underline" href={site.mapsUrl}>
-          Get directions to our Covington shop
-        </a>
-      </p>
     </div>
   );
 }

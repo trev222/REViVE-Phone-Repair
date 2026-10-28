@@ -9,6 +9,7 @@ const navigation = [
   ["/", "Home"],
   ["/services", "Services"],
   ["/about", "About"],
+  ["/locations", "Locations"],
   ["/contact", "Contact"],
 ] as const;
 
@@ -57,7 +58,7 @@ export function SiteHeader() {
           <Logo />
         </Link>
         <nav
-          className="hidden items-center justify-center gap-9 md:flex"
+          className="hidden shrink-0 items-center justify-center gap-5 md:flex lg:gap-9"
           aria-label="Main navigation"
         >
           {navigation.map(([href, label]) => (
