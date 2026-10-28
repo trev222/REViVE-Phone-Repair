@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -8,12 +8,44 @@ import { build } from "esbuild";
 
 const directory = await mkdtemp(join(tmpdir(), "revive-email-test-"));
 const output = join(directory, "email.mjs");
+const smtpMock = join(directory, "smtp-mock.mjs");
+await writeFile(
+  smtpMock,
+  `
+export const state = { sent: [], transports: [], closed: 0, send: undefined };
+export default {
+  createTransport(options) {
+    state.transports.push(options);
+    return {
+      async sendMail(message) {
+        if (state.send) return state.send(message);
+        state.sent.push(message);
+        return { accepted: [message.to], rejected: [] };
+      },
+      close() { state.closed++; }
+    };
+  }
+};
+`,
+);
+const { state: smtpState } = await import(pathToFileURL(smtpMock));
 await build({
   entryPoints: ["cloudflare/contact-email.ts"],
   outfile: output,
   bundle: true,
   format: "esm",
   platform: "node",
+  plugins: [
+    {
+      name: "local-only-smtp",
+      setup(build) {
+        build.onResolve({ filter: /^nodemailer$/ }, () => ({
+          path: smtpMock,
+          external: true,
+        }));
+      },
+    },
+  ],
 });
 const { default: worker } = await import(pathToFileURL(output));
 const pagesOutput = join(directory, "pages.cjs");
@@ -51,15 +83,14 @@ const request = (data = quote, headers = {}) =>
     body: JSON.stringify(data),
   });
 function environment(overrides = {}) {
-  const sent = [];
+  smtpState.sent = [];
+  smtpState.transports = [];
+  smtpState.closed = 0;
+  smtpState.send = undefined;
+  const sent = smtpState.sent;
   const env = {
     CONTACT_EMAIL_ENABLED: "true",
-    EMAIL: {
-      send: async (message) => {
-        sent.push(message);
-        return { messageId: "local-test-only" };
-      },
-    },
+    SMTP_PASSWORD: "test only fake pass",
     CONTACT_RATE_LIMITER: { limit: async () => ({ success: true }) },
     CONTACT_SITE_LIMITER: { limit: async () => ({ success: true }) },
     ...overrides,
@@ -120,9 +151,21 @@ test("Cloudflare mail preserves quote details and ignores visitor-supplied recip
   assert.deepEqual(await response.json(), { ok: true });
   assert.equal(sent.length, 1);
   assert.equal(sent[0].to, "revivecovington@gmail.com");
-  assert.equal(sent[0].from.email, "quotes@revivephonerepair.com");
+  assert.equal(
+    sent[0].from,
+    "REViVE website quotes <revivecovington@gmail.com>",
+  );
+  assert.equal(smtpState.transports[0].host, "smtp.gmail.com");
+  assert.equal(smtpState.transports[0].port, 465);
+  assert.equal(smtpState.transports[0].secure, true);
+  assert.equal(smtpState.transports[0].requireTLS, true);
+  assert.deepEqual(smtpState.transports[0].auth, {
+    user: "revivecovington@gmail.com",
+    pass: "testonlyfakepass",
+  });
+  assert.equal(smtpState.closed, 1);
   assert.deepEqual(sent[0].replyTo, {
-    email: quote.email,
+    address: quote.email,
     name: "Quote Visitor",
   });
   for (const value of [
@@ -138,7 +181,8 @@ test("Cloudflare mail preserves quote details and ignores visitor-supplied recip
 test("Cloudflare mail stays unavailable while activation or required bindings are missing", async () => {
   for (const patch of [
     { CONTACT_EMAIL_ENABLED: "false" },
-    { EMAIL: undefined },
+    { SMTP_PASSWORD: undefined },
+    { SMTP_PASSWORD: "   " },
     { CONTACT_RATE_LIMITER: undefined },
     { CONTACT_SITE_LIMITER: undefined },
   ]) {
@@ -155,11 +199,13 @@ test("Cloudflare mail failures never return success or expose provider details",
     async () => {
       throw new Error("private provider details");
     },
-    async () => ({}),
+    async () => ({ accepted: [], rejected: ["revivecovington@gmail.com"] }),
   ]) {
-    const { env } = environment({ EMAIL: { send } });
+    const { env } = environment();
+    smtpState.send = send;
     const response = await worker.fetch(request(), env);
     assert.equal(response.status, 502);
+    assert.equal(smtpState.closed, 1);
     const body = await response.text();
     assert.match(body, /couldn’t send/);
     assert.doesNotMatch(body, /private provider details|ok.*true/);

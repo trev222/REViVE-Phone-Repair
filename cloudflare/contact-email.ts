@@ -1,26 +1,18 @@
 import { handleContact } from "../src/lib/contact";
+import { createSmtpSender } from "../src/lib/contact-smtp";
 
 type RateLimiter = {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 };
-type EmailBinding = {
-  send(message: {
-    from: { email: string; name: string };
-    to: string;
-    replyTo: { email: string; name: string };
-    subject: string;
-    text: string;
-  }): Promise<{ messageId: string }>;
-};
 export type EmailEnvironment = {
-  EMAIL?: EmailBinding;
+  SMTP_PASSWORD?: string;
   CONTACT_RATE_LIMITER?: RateLimiter;
   CONTACT_SITE_LIMITER?: RateLimiter;
   CONTACT_EMAIL_ENABLED?: string;
 };
 
 // This Worker is private: Pages calls it through the CONTACT_EMAIL service binding.
-// Sender and recipient are fixed here and in the email binding, never supplied by a visitor.
+// Gmail sender and recipient are fixed here, never supplied by a visitor.
 export default {
   async fetch(
     request: Request,
@@ -38,9 +30,20 @@ export default {
         status: 405,
         headers: { Allow: "POST", "Cache-Control": "no-store" },
       });
+    const sender = createSmtpSender({
+      SMTP_HOST: "smtp.gmail.com",
+      SMTP_PORT: "465",
+      SMTP_SECURE: "true",
+      SMTP_REQUIRE_TLS: "true",
+      SMTP_USER: "revivecovington@gmail.com",
+      // Google displays app passwords in groups. Accept pastes with those spaces.
+      SMTP_PASSWORD: environment.SMTP_PASSWORD?.replace(/\s/g, ""),
+      CONTACT_FROM: "REViVE website quotes <revivecovington@gmail.com>",
+      CONTACT_TO: "revivecovington@gmail.com",
+    });
     if (
       environment.CONTACT_EMAIL_ENABLED !== "true" ||
-      !environment.EMAIL ||
+      !sender ||
       !environment.CONTACT_RATE_LIMITER ||
       !environment.CONTACT_SITE_LIMITER
     ) {
@@ -49,25 +52,6 @@ export default {
         503,
       );
     }
-
-    const sender = async (message: {
-      replyTo: { name: string; address: string };
-      subject: string;
-      text: string;
-    }) => {
-      const result = await environment.EMAIL!.send({
-        from: {
-          email: "quotes@revivephonerepair.com",
-          name: "REViVE website quotes",
-        },
-        to: "revivecovington@gmail.com",
-        replyTo: { name: message.replyTo.name, email: message.replyTo.address },
-        subject: message.subject,
-        text: message.text,
-      });
-      if (!result?.messageId)
-        throw new Error("Email provider did not acknowledge the message");
-    };
 
     try {
       // Cloudflare supplies this header on the public Pages request. IPs are not logged or stored.

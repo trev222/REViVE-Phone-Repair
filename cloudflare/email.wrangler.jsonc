@@ -8,9 +8,7 @@
   "workers_dev": false,
   "preview_urls": false,
   "vars": { "CONTACT_EMAIL_ENABLED": "false" },
-  "send_email": [
-    { "name": "EMAIL", "destination_address": "revivecovington@gmail.com" },
-  ],
+  // Add SMTP_PASSWORD as an encrypted Worker secret. Never put it in this file.
   "ratelimits": [
     {
       "name": "CONTACT_RATE_LIMITER",
