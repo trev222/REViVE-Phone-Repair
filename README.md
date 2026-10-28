@@ -91,6 +91,8 @@ Cloudflare has an enabled redirect rule named `Canonical www to revivephonerepai
 
 The domain property is verified in Google Search Console using a DNS TXT record. Google successfully processed the sitemap and discovered all ten pages on October 28, 2026. Its live Rich Results Test validated LocalBusiness, Organization, and BreadcrumbList data on the screen-repair page; the only non-critical recommendation was an optional `priceRange`, omitted until pricing is confirmed. Keep the verification record to retain access. Give the client's own Google account independent verified-owner access before handover; a managing account should not remain their only owner. Search indexing and AI citations are determined by the search providers, not guaranteed by metadata or an AI-specific text file.
 
+Bing Webmaster Tools is also verified using a DNS-only CNAME record pointing to `verify.bing.com`. The same sitemap was submitted on October 28, 2026 and accepted with a `Processing` status. Keep this verification record as well. Google and Bing reporting will populate as their crawlers process the site; sitemap submission does not mean every page has been indexed.
+
 ### Standard Node.js hosting
 
 The app can also run on a conventional Node.js host with `npm ci`, `npm run build`, and `npm start`. Set runtime variables before starting it. Static-only or PHP-only hosting cannot run its Next.js contact route; Cloudflare Pages uses the bundled Function instead. Fonts and images are hosted locally.
