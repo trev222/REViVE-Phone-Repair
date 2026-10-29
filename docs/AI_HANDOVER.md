@@ -94,7 +94,7 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 
 | Setting | Current value |
 | --- | --- |
-| Resend team | Existing `voric41` team; client and developer are both Admins |
+| Resend team | `REViVE Phone Repair`; `revivecovington@gmail.com` is the only member and Admin |
 | Verified sending domain | `notifications.revivephonerepair.com`, North Virginia region |
 | Sender | `REViVE website quotes <quotes@notifications.revivephonerepair.com>` |
 | Fixed recipient | `revivecovington@gmail.com` |
@@ -105,7 +105,7 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 
 Sender/recipient are fixed in `src/lib/contact-resend.ts`. `CONTACT_TO` and `CONTACT_FROM` from the SMTP environment do not configure production Resend. Changing the public email in `site.ts` does not change delivery. Change the adapter and tests, deploy the email Worker, and update/publish public content separately if appropriate.
 
-**Client access handover:** on October 29, 2026, the external Chrome session was signed in as `revivecovington@gmail.com`. Resend Team settings confirmed both that client login and `voric41@gmail.com` as joined **Admins** of the existing `voric41` team. The team contains one domain, `notifications.revivephonerepair.com`. A separate client team has not been created, and the developer has not been removed. The new-team flow displayed **Paid feature**. Resolve the user's preference for a separate team versus handing over this existing team before changing the setup; no subscription was authorized or purchased. These access checks did not change the sending domain, API key, Cloudflare deployment, or billing plan.
+**Client access handover completed October 29, 2026:** the user chose to hand over the existing free team. While signed into the client's external Chrome session, the team was renamed from `voric41` to **REViVE Phone Repair**, and `voric41@gmail.com` was removed. Team settings then showed `revivecovington@gmail.com` as the only member, with the **Admin** role. The domain list still showed `notifications.revivephonerepair.com` as **Verified**, and the existing `REViVE website quotes` key remained present with **Sending access**. The sending domain, API key, Cloudflare secret/deployment, and billing plan were not changed. No separate team, paid subscription, or additional test email was created. A future maintainer needs a client-authorized invitation to administer this Resend team; the developer's former membership no longer provides access.
 
 For a future migration, [Resend's domain-management documentation](https://resend.com/docs/dashboard/domains/manage-domains) says a domain can be active on only one team at a time. Moving the same domain requires deleting it from the old team and adding it to the destination. Do not delete the active production domain prematurely. A different sending subdomain can be prepared separately, but would also require updating the fixed sender, DNS, restricted key, tests, and deployed Worker. Obtain any necessary authorization for access changes, charges, and a live test before performing them.
 
@@ -146,7 +146,7 @@ Google Search Console and Bing were verified through the managing Google account
 - Last email implementation commit before this documentation: `8503cc1` (`Activate quote delivery through Resend`). Typecheck and all 11 email adapter/service/runtime checks passed then. The older 14 integration checks had passed previously; they were not rerun for that adapter-only change.
 - Live Worker version `abbbdbca-6a11-4f86-b3f1-b7e6062ba53b` was active with sending enabled at the October 29 check.
 - One authorized test quote submitted through the live form produced Resend ID `01a184c2-ed14-7b57-8a6f-d4ab782456d7`, status Delivered at October 28, 2026 23:05 UTC (October 29 08:05 JST). [Delivery record](https://resend.com/emails/01a184c2-ed14-7b57-8a6f-d4ab782456d7). Recipient Inbox/Spam placement remains for the client to confirm.
-- No paid plan was purchased. Existing inbound mail was preserved. The client has accepted Resend Admin access; the final team handover or migration and independent search ownership still need arranging. This document does not authorize further access grants or a billing change.
+- No paid plan was purchased. Existing inbound mail was preserved. The Resend team handover is complete; independent client access to Google Search Console and Bing still needs arranging. This document does not authorize further access grants or a billing change.
 
 If the site breaks, use the last known working **production** deployment's rollback control in Cloudflare Pages, then revert the faulty source commit with a new commit on `develop` and publish the corrected source. Avoid resetting or force-pushing shared history. Inspect the chosen deployment and bindings before rollback; website and email Worker releases are independent.
 

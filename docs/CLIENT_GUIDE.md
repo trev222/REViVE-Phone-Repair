@@ -124,7 +124,7 @@ GitHub access lets you edit files. Separate account access is needed to publish,
 | --- | --- |
 | GitHub | `clayb1919` has accepted repository-only write access. |
 | Cloudflare | Client account is associated with ReviveCovington@gmail.com. Each maintainer needs authorized deployment access. |
-| Resend | ReviveCovington@gmail.com has accepted Admin access to the existing `voric41` team. The developer also remains an Admin; a separate team has not been created. |
+| Resend | Client handover completed October 29, 2026. The team is named **REViVE Phone Repair** and ReviveCovington@gmail.com is its only member and Admin. The developer's membership was removed. |
 | Google Search Console and Bing | Set up through the developer's Google account. Arrange the client's own access; Google should have a client-controlled verified owner. |
 | Gmail | Client controls the destination mailbox. No Gmail password is stored in the website. |
 
@@ -143,7 +143,7 @@ Search metadata, a sitemap, and local-business information are already included.
 ### Finish the handover
 
 - Sign into GitHub as **clayb1919** and open **develop**.
-- Decide whether to keep the existing Resend team and remove the developer after handover, or migrate to a separate team. Resend currently marks new-team creation as a paid feature; no paid plan has been purchased.
+- Sign into Resend as **ReviveCovington@gmail.com** and select **REViVE Phone Repair**. The existing free team has been handed over; its sending domain and website connection are unchanged. No paid plan was purchased.
 - Confirm the client can read a quote and reply to the customer.
 - Arrange the Cloudflare and search-tool access needed by the long-term maintainer.
 - Keep this guide updated when the setup changes. The [technical handover](https://github.com/trev222/REViVE-Phone-Repair/blob/develop/docs/AI_HANDOVER.md) gives an AI agent or developer the file map, commands, and recovery details.
