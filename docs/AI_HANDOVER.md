@@ -18,7 +18,7 @@ Operational snapshot: October 29, 2026. Read this with [AGENTS.md](../AGENTS.md)
 | Wrangler profile | `revive-phone-repair` |
 | Private email Worker | `revive-contact-email` |
 
-GitHub user `clayb1919` was invited on October 29, 2026 with **write** access to this repository only. The invitation was pending when checked. It confers no Cloudflare, Resend, Gmail, or search-tool access. Do not assume access has been accepted or grant broader privileges from this document.
+GitHub user `clayb1919` has accepted **write** access to this repository only, confirmed through GitHub's collaborator-permission endpoint on October 29, 2026. It confers no Cloudflare, Resend, Gmail, or search-tool access. This document does not authorize broader privileges.
 
 The existing machine's **default Wrangler profile belongs to the developer's personal account**. Use the named client profile in the scripts. On another machine, authenticate an authorized client user; credentials and secrets are not transferred by cloning the repository. The Pages config omits `account_id` because that field is unsupported there; the private Worker config pins the client account ID.
 
@@ -94,7 +94,7 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 
 | Setting | Current value |
 | --- | --- |
-| Resend team | Existing `voric41` team; client Admin invitation pending |
+| Resend team | Existing `voric41` team; client and developer are both Admins |
 | Verified sending domain | `notifications.revivephonerepair.com`, North Virginia region |
 | Sender | `REViVE website quotes <quotes@notifications.revivephonerepair.com>` |
 | Fixed recipient | `revivecovington@gmail.com` |
@@ -105,7 +105,9 @@ Flow: browser `POST /api/contact` → Pages adapter → private `revive-contact-
 
 Sender/recipient are fixed in `src/lib/contact-resend.ts`. `CONTACT_TO` and `CONTACT_FROM` from the SMTP environment do not configure production Resend. Changing the public email in `site.ts` does not change delivery. Change the adapter and tests, deploy the email Worker, and update/publish public content separately if appropriate.
 
-**Client access handover:** with explicit approval, an **Admin** invitation was sent to `ReviveCovington@gmail.com` on October 29, 2026. Resend Team settings showed **Pending Admin** afterward. The team contains one domain, `notifications.revivephonerepair.com`. The client must accept through their own email and confirm their Resend access before the handover is complete. The existing `voric41@gmail.com` administrator remains; do not claim ownership/access has fully transferred or remove it while the invitation is pending. The invitation did not change the sending domain, API key, Cloudflare deployment, or billing plan.
+**Client access handover:** on October 29, 2026, the external Chrome session was signed in as `revivecovington@gmail.com`. Resend Team settings confirmed both that client login and `voric41@gmail.com` as joined **Admins** of the existing `voric41` team. The team contains one domain, `notifications.revivephonerepair.com`. A separate client team has not been created, and the developer has not been removed. The new-team flow displayed **Paid feature**. Resolve the user's preference for a separate team versus handing over this existing team before changing the setup; no subscription was authorized or purchased. These access checks did not change the sending domain, API key, Cloudflare deployment, or billing plan.
+
+For a future migration, [Resend's domain-management documentation](https://resend.com/docs/dashboard/domains/manage-domains) says a domain can be active on only one team at a time. Moving the same domain requires deleting it from the old team and adding it to the destination. Do not delete the active production domain prematurely. A different sending subdomain can be prepared separately, but would also require updating the fixed sender, DNS, restricted key, tests, and deployed Worker. Obtain any necessary authorization for access changes, charges, and a live test before performing them.
 
 `RESEND_API_KEY` is a **Sending access** key restricted to the notification domain, named `REViVE website quotes`. Never print it, commit it, include it in a `NEXT_PUBLIC_` variable, or pass it as a visible shell argument. Rotate it through Resend and the Cloudflare dashboard or the hidden prompt:
 
@@ -144,7 +146,7 @@ Google Search Console and Bing were verified through the managing Google account
 - Last email implementation commit before this documentation: `8503cc1` (`Activate quote delivery through Resend`). Typecheck and all 11 email adapter/service/runtime checks passed then. The older 14 integration checks had passed previously; they were not rerun for that adapter-only change.
 - Live Worker version `abbbdbca-6a11-4f86-b3f1-b7e6062ba53b` was active with sending enabled at the October 29 check.
 - One authorized test quote submitted through the live form produced Resend ID `01a184c2-ed14-7b57-8a6f-d4ab782456d7`, status Delivered at October 28, 2026 23:05 UTC (October 29 08:05 JST). [Delivery record](https://resend.com/emails/01a184c2-ed14-7b57-8a6f-d4ab782456d7). Recipient Inbox/Spam placement remains for the client to confirm.
-- No paid plan was purchased. Existing inbound mail was preserved. The client's Resend Admin invitation awaits acceptance; independent search ownership still needs arranging. This document does not authorize further access grants or a billing change.
+- No paid plan was purchased. Existing inbound mail was preserved. The client has accepted Resend Admin access; the final team handover or migration and independent search ownership still need arranging. This document does not authorize further access grants or a billing change.
 
 If the site breaks, use the last known working **production** deployment's rollback control in Cloudflare Pages, then revert the faulty source commit with a new commit on `develop` and publish the corrected source. Avoid resetting or force-pushing shared history. Inspect the chosen deployment and bindings before rollback; website and email Worker releases are independent.
 

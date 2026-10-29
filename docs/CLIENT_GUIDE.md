@@ -20,7 +20,7 @@ Your live website is [revivephonerepair.com](https://revivephonerepair.com). It 
 
 Open the [current website files on GitHub](https://github.com/trev222/REViVE-Phone-Repair/tree/develop). Always select the **develop** branch, which is the current website version. GitHub currently opens **master** by default; that is the old PHP site. **php-archive** also preserves the old site.
 
-GitHub user **clayb1919** was invited with write access to this repository on October 29, 2026. Accept the [repository invitation](https://github.com/trev222/REViVE-Phone-Repair/invitations) while signed into that account. This invitation does not give access to other repositories or to Cloudflare, Resend, or Gmail.
+GitHub user **clayb1919** has accepted write access to this repository, confirmed on October 29, 2026. Sign in with that account to edit the files. This access does not extend to other repositories or to Cloudflare, Resend, or Gmail.
 
 <!-- pagebreak -->
 
@@ -122,9 +122,9 @@ GitHub access lets you edit files. Separate account access is needed to publish,
 
 | Account or tool | Current handover position |
 | --- | --- |
-| GitHub | `clayb1919` has a repository-only write invitation to accept. |
+| GitHub | `clayb1919` has accepted repository-only write access. |
 | Cloudflare | Client account is associated with ReviveCovington@gmail.com. Each maintainer needs authorized deployment access. |
-| Resend | Admin invitation sent to ReviveCovington@gmail.com on October 29, 2026; awaiting acceptance. The developer still has access to the existing `voric41` team. |
+| Resend | ReviveCovington@gmail.com has accepted Admin access to the existing `voric41` team. The developer also remains an Admin; a separate team has not been created. |
 | Google Search Console and Bing | Set up through the developer's Google account. Arrange the client's own access; Google should have a client-controlled verified owner. |
 | Gmail | Client controls the destination mailbox. No Gmail password is stored in the website. |
 
@@ -142,8 +142,8 @@ Search metadata, a sitemap, and local-business information are already included.
 
 ### Finish the handover
 
-- Accept the GitHub invitation and open **develop**.
-- Accept the Resend invitation in the client's Gmail, sign in using that address, and confirm access before removing the developer from the team.
+- Sign into GitHub as **clayb1919** and open **develop**.
+- Decide whether to keep the existing Resend team and remove the developer after handover, or migrate to a separate team. Resend currently marks new-team creation as a paid feature; no paid plan has been purchased.
 - Confirm the client can read a quote and reply to the customer.
 - Arrange the Cloudflare and search-tool access needed by the long-term maintainer.
 - Keep this guide updated when the setup changes. The [technical handover](https://github.com/trev222/REViVE-Phone-Repair/blob/develop/docs/AI_HANDOVER.md) gives an AI agent or developer the file map, commands, and recovery details.
