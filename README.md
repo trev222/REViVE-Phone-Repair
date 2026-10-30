@@ -59,7 +59,7 @@ Production: [revivephonerepair.com](https://revivephonerepair.com), also availab
 
 Both website hostnames point to the Pages project. The 11 legacy service aliases (`autoconfig.admin`, `autoconfig`, `autodiscover.admin`, `autodiscover`, `cpanel`, `ftp`, `webdisk.admin`, `webdisk`, `webmail`, `whm`, and `www.admin`) point through `admin.revivephonerepair.com` to retain the original server routing. The existing admin, mail, MX, SRV, and TXT records were preserved.
 
-The Pages build exports an isolated copy of the Next.js pages to `out/`, then bundles the shared contact handler as a Pages advanced-mode `_worker.js`. The normal Next.js development server remains available. `_routes.json` limits Function execution to `/api/*`; the other pages and assets are served by Pages. `_redirects` preserves the old PHP/HTML URLs and their query strings.
+The Pages build exports an isolated copy of the Next.js pages to `out/`, then bundles the shared contact handler as a Pages advanced-mode `_worker.js`. The normal Next.js development server remains available. `_routes.json` limits Function execution to the exact `/api/contact` path; all other paths are served by Pages. GET requests to unknown `/api/*` paths receive the static HTML 404 page without invoking the Function; Pages rejects POST requests to static paths with 405. `_redirects` preserves the old PHP/HTML URLs and their query strings.
 
 ```sh
 npm run build:pages
@@ -67,7 +67,7 @@ npm run preview:pages
 npm run test:pages
 ```
 
-The suite runs 14 HTTP/SMTP/SEO integration checks against the Cloudflare runtime and 11 email Worker/service adapter/runtime checks. It covers fixed recipients, Reply-To, paused delivery, rate-limit failures, and immutable service response headers. Test mail is captured locally or mocked; no real inboxes are contacted.
+The suite runs 14 shared HTTP/SMTP/SEO integration checks, one Pages routing regression check, and 11 email Worker/service adapter/runtime checks. The routing check pins the generated `_routes.json` to `/api/contact` and verifies that unrelated API paths return the static HTML 404 page. The suite also covers fixed recipients, Reply-To, paused delivery, rate-limit failures, and immutable service response headers. Test mail is captured locally or mocked; no real inboxes are contacted.
 
 This project uses **Direct Upload**. Pushing Git commits does not automatically deploy the site. This machine has a separate, approved Wrangler profile named `revive-phone-repair` for the client account. The deploy scripts explicitly select it; the personal default profile is unchanged. On another machine, create the authorized client profile with `wrangler auth create revive-phone-repair`. Deploy the current checkout with:
 

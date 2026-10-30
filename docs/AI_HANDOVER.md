@@ -1,6 +1,6 @@
 # REViVE technical handover
 
-Operational snapshot: October 29, 2026. Read this with [AGENTS.md](../AGENTS.md), the [client guide](CLIENT_GUIDE.md), and [README.md](../README.md). Verify the current checkout and remote account state before making changes; dated observations below are not continuous monitoring.
+Operational snapshot: October 30, 2026. Read this with [AGENTS.md](../AGENTS.md), the [client guide](CLIENT_GUIDE.md), and [README.md](../README.md). Verify the current checkout and remote account state before making changes; dated observations below are not continuous monitoring.
 
 ## Start with the correct source and account
 
@@ -26,7 +26,7 @@ The existing machine's **default Wrangler profile belongs to the developer's per
 
 - Next.js App Router `16.4.3`, React `19.3.1`, TypeScript, Tailwind, npm, Node.js 22 or newer. Use `.nvmrc` and the lockfile. Read the relevant bundled Next documentation in `node_modules/next/dist/docs/` before changing framework code.
 - `scripts/build-pages.mjs` builds an isolated static export, excluding the Next API route, then bundles `cloudflare/worker.ts` as the Pages advanced-mode `out/_worker.js`. It generates `_routes.json`, `_redirects`, and `_headers`. Edit source, not `out/` or temporary `.pages-build-*` copies.
-- Pages executes the Worker for `/api/*`. Production `/api/contact` forwards through the `CONTACT_EMAIL` service binding to the private email Worker. The production binding is in `wrangler.jsonc`; preview intentionally has no live mail binding.
+- Pages executes the Worker only for the exact `/api/contact` path. Other paths go directly to Pages static assets: GET requests to unknown `/api/*` paths receive the HTML 404 page, while POST requests to static paths receive 405. Keep the generated `_routes.json` include list narrow to avoid unnecessary Function invocations. The generic API 404 branch in `cloudflare/worker.ts` remains a fallback when the Worker is invoked directly. Production `/api/contact` forwards through the `CONTACT_EMAIL` service binding to the private email Worker. The production binding is in `wrangler.jsonc`; preview intentionally has no live mail binding.
 - A normal local/Node Next server uses `src/app/api/contact/route.ts` and the SMTP adapter. Local SMTP configuration is separate from production Resend delivery. Do not try to fix production by adding Gmail credentials to `.env.local`.
 - Hosting is **Cloudflare Pages Direct Upload**. GitHub pushes do not trigger deployment. `--branch main` in the deploy script selects the Pages production label; it does not change the source branch from `develop`.
 
@@ -66,7 +66,7 @@ For email Worker/adapter changes, use typecheck plus:
 node --test tests/contact-email.test.mjs tests/contact-resend-runtime.test.mjs
 ```
 
-Run broader tests if shared validation or the Pages adapter changes. The suite currently contains 14 HTTP/SMTP/SEO integration tests and 11 email adapter/service/runtime tests. All test mail is local or intercepted. A real form submission sends to the client and needs authorization for that send; this handover does not authorize extra test messages.
+Run broader tests if shared validation or the Pages adapter changes. The suite currently contains 14 shared HTTP/SMTP/SEO integration tests, one Pages-only routing regression test, and 11 email adapter/service/runtime tests. The routing test pins the generated `_routes.json` and checks static HTML 404 responses for unrelated API paths while GET `/api/contact` still returns 405. All test mail is local or intercepted. A real form submission sends to the client and needs authorization for that send; this handover does not authorize extra test messages.
 
 ## Content map and linked changes
 

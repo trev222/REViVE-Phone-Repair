@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { readFile } from "node:fs/promises";
 import net from "node:net";
 import { after, before, test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
@@ -243,6 +244,46 @@ test("unknown pages return 404", async () => {
   assert.equal((await fetch(origin + "/does-not-exist")).status, 404);
   assert.equal((await fetch(origin + "/services/does-not-exist")).status, 404);
 });
+
+test(
+  "Pages invokes the Function only for the exact contact route",
+  { skip: process.env.TEST_TARGET !== "pages" },
+  async () => {
+    // Pin the deployed routing boundary, including paths not sampled below.
+    const routes = JSON.parse(await readFile("out/_routes.json", "utf8"));
+    assert.deepEqual(routes, {
+      version: 1,
+      include: ["/api/contact"],
+      exclude: [],
+    });
+
+    const notFound = await readFile("out/404.html", "utf8");
+    for (const path of [
+      "/api/.env",
+      "/api/v1/validate/code",
+      "/api/graphql",
+      "/api/contact-extra",
+      "/api/contact/extra",
+    ]) {
+      const response = await fetch(origin + path);
+      assert.equal(response.status, 404, path);
+      assert.match(response.headers.get("content-type"), /^text\/html\b/);
+      assert.equal(await response.text(), notFound, path);
+      // Pages' static handler rejects POST instead of reaching the Worker's JSON 404.
+      assert.equal(
+        (await fetch(origin + path, { method: "POST" })).status,
+        405,
+        `POST ${path}`,
+      );
+    }
+
+    for (const path of ["/api/contact", "/api/contact?source=routing-test"]) {
+      const response = await fetch(origin + path);
+      assert.equal(response.status, 405, path);
+      assert.equal(response.headers.get("allow"), "POST");
+    }
+  },
+);
 
 test("every sitemap page has unique search metadata and consistent business data", async () => {
   const sitemap = await (await fetch(origin + "/sitemap.xml")).text();

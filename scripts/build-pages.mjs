@@ -80,7 +80,7 @@ try {
   });
   await writeFile(
     join(output, "_routes.json"),
-    JSON.stringify({ version: 1, include: ["/api/*"], exclude: [] }),
+    JSON.stringify({ version: 1, include: ["/api/contact"], exclude: [] }),
   );
   const redirects = [];
   for (const route of [
